@@ -1,0 +1,51 @@
+name: "Compilar Aplicativo (Windows e Linux)"
+
+on:
+  workflow_dispatch: # Permite que você rode a compilação manualmente clicando em um botão
+
+jobs:
+  build-tauri:
+    permissions:
+      contents: write # Dá permissão ao robô do GitHub para salvar os arquivos gerados
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # A mágica acontece aqui: ele vai abrir duas máquinas virtuais na nuvem!
+        platform: [windows-latest, ubuntu-22.04]
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: 1. Baixar o código do repositório
+        uses: actions/checkout@v4
+
+      - name: 2. Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 3. Instalar Linguagem Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: 4. Instalar bibliotecas do Linux (Roda apenas na máquina Ubuntu)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - name: 5. Instalar dependências do projeto
+        run: npm install
+
+      - name: 6. Compilar o Tauri e Gerar Executáveis
+        uses: tauri-apps/tauri-action@v0
+        env:
+          # O GitHub gera essa senha automaticamente, não precisa mexer!
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Cria um nome de versão único baseado no número da execução
+          tagName: "v1.0.${{ github.run_number }}" 
+          releaseName: "Gerador de Campanha (Versão 1.0.${{ github.run_number }})"
+          releaseBody: "Arquivos instaladores gerados automaticamente nas nuvens do GitHub."
+          releaseDraft: false
+          prerelease: false

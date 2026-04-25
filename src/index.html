@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Campanha</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Bibliotecas de renderização removidas: Exportação utiliza API Nativa Canvas 2D de Alta Performance -->
+
+    <!-- Google Fonts para as 20 FontArts -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Carter+One&family=Cinzel:wght@700&family=Creepster&family=Fredoka+One&family=Montserrat:wght@900&family=Pacifico&family=Permanent+Marker&family=Press+Start+2P&family=Righteous&family=Russo+One&family=Monoton&family=Lobster&family=Black+Ops+One&family=Fascinate+Inline&family=Knewave&family=Luckiest+Guy&family=Shrikhand&display=swap" rel="stylesheet">
+
+    <style>
+        /* === ÁREA DE TRABALHO RESPONSIVA === */
+        #workspace-container {
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        #workspace-wrapper {
+            position: relative;
+        }
+
+        #workspace {
+            width: 1920px; /* Full HD Constante */
+            height: 1080px; /* Full HD Constante - Proporção 16:9 */
+            background-color: #ffffff;
+            position: absolute;
+            top: 0; left: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            transform-origin: top left;
+        }
+
+        /* === ELEMENTOS DO CANVAS === */
+        .canvas-element {
+            position: absolute;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            min-width: 50px;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-element:active { cursor: grabbing; }
+
+        .canvas-element img {
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        #bg-layer img {
+            object-fit: cover;
+        }
+
+        .canvas-element.selected { outline: 3px dashed #3b82f6; }
+
+        /* Textos e Alças */
+        .text-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas-text {
+            width: 100%;
+            cursor: text;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            text-align: center;
+            outline: none;
+            line-height: 1.2;
+            font-size: 60px;
+        }
+
+        /* Camada de Controles (Alças e Deletar) */
+        .controls-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: none;
+        }
+        .canvas-element.selected .controls-layer { display: block; }
+
+        .delete-btn {
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            pointer-events: auto;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        /* Alças Dinâmicas de Redimensionamento */
+        .resize-handle {
+            position: absolute;
+            background: #3b82f6;
+            box-shadow: 0 0 5px rgba(0,0,0,0.4);
+            pointer-events: auto;
+            z-index: 10;
+            border-radius: 4px;
+        }
+        .resize-right {
+            top: 50%; right: -6px; width: 12px; height: 34px;
+            transform: translateY(-50%); cursor: e-resize;
+        }
+        .resize-bottom {
+            bottom: -6px; left: 50%; width: 34px; height: 12px;
+            transform: translateX(-50%); cursor: s-resize;
+        }
+        .resize-corner {
+            bottom: -8px; right: -8px; width: 20px; height: 20px;
+            cursor: se-resize; border-radius: 50%; border: 2px solid white;
+        }
+
+        /* Modificadores Visuais */
+        .locked { pointer-events: none !important; opacity: 0.8; }
+        .bg-element { z-index: 0 !important; }
+        .btn-disabled { opacity: 0.5; cursor: not-allowed !important; }
+
+        /* === FONT ARTS === */
+        .fa-1 { font-family: 'Arial', sans-serif; font-weight: bold; color: #111; }
+        .fa-2 { font-family: 'Arial', sans-serif; font-weight: bold; color: #fff; -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0 #000; }
+        .fa-3 { font-family: 'Impact', sans-serif; text-transform: uppercase; color: #ffeb3b; -webkit-text-stroke: 2px #d32f2f; }
+        .fa-4 { font-family: 'Impact', sans-serif; text-transform: uppercase; color: #fff; text-shadow: 4px 4px 0 #3b82f6, 8px 8px 0 #1e3a8a; }
+        .fa-5 { font-family: 'Courier New', monospace; font-weight: bold; color: #fff; text-shadow: 0 0 5px #fff, 0 0 20px #0ff, 0 0 40px #0ff, 0 0 80px #0ff; }
+        .fa-6 { font-family: 'Courier New', monospace; font-weight: bold; color: #fff; text-shadow: 0 0 5px #fff, 0 0 20px #f0f, 0 0 40px #f0f, 0 0 80px #f0f; }
+        .fa-7 { font-family: 'Pacifico', cursive; color: #e91e63; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .fa-8 { font-family: 'Press Start 2P', cursive; color: #4caf50; text-shadow: 4px 4px 0 #000; }
+        .fa-9 { font-family: 'Creepster', cursive; color: #8b0000; -webkit-text-stroke: 1px #000; text-shadow: 2px 2px 10px #ff0000; }
+        .fa-10 { font-family: 'Righteous', cursive; color: #ff9800; text-shadow: 3px 3px 0 #000; }
+        .fa-11 { font-family: 'Cinzel', serif; color: #d4af37; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .fa-12 { font-family: 'Fredoka One', cursive; color: #00bcd4; -webkit-text-stroke: 2px #000; }
+        .fa-13 { font-family: 'Bangers', cursive; color: #f44336; text-shadow: 3px 3px 0 #000, 6px 6px 0 #ffeb3b; letter-spacing: 2px; }
+        .fa-14 { font-family: 'Montserrat', sans-serif; text-transform: uppercase; color: #cc33ff; -webkit-text-stroke: 1px #333399; text-shadow: 2px 2px 0 #333399; }
+        .fa-15 { font-family: 'Russo One', sans-serif; color: #9e9e9e; text-shadow: 0px 1px 0px #fff, 0px -1px 0px #000, 2px 2px 5px rgba(0,0,0,0.5); }
+        .fa-16 { font-family: 'Monoton', cursive; color: #e91e63; }
+        .fa-17 { font-family: 'Lobster', cursive; color: #fff; text-shadow: 0 2px 4px #000, 0 -2px 4px #000, 2px 0 4px #000, -2px 0 4px #000; }
+        .fa-18 { font-family: 'Black Ops One', cursive; color: #4b5320; text-shadow: 2px 2px 0 #fff; }
+        .fa-19 { font-family: 'Fascinate Inline', cursive; color: #673ab7; text-shadow: 3px 3px 0px #ffc107; }
+        .fa-20 { font-family: 'Shrikhand', cursive; color: #ff5722; -webkit-text-stroke: 1px #795548; text-shadow: 5px 5px 0 #ffc107; }
+
+        /* Scrollbar customizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Input de cor personalizado */
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen w-screen overflow-hidden flex flex-col font-sans text-gray-800">
+
+    <div id="main-app" class="h-full flex flex-col">
+        
+        <header class="bg-white border-b border-gray-200 shadow-sm h-36 flex flex-col shrink-0">
+            <div class="px-4 py-2 bg-blue-600 text-white flex justify-between items-center text-sm font-bold">
+                <div class="flex items-center gap-2 text-lg">
+                    <i class="ph ph-star"></i> Área dos Candidatos
+                </div>
+                <div class="flex items-center gap-4 text-xs font-normal">
+                    <label class="cursor-pointer bg-white text-blue-600 hover:bg-blue-50 px-4 py-1.5 rounded-full shadow-sm font-bold flex items-center gap-2 transition">
+                        <i class="ph ph-upload-simple text-lg"></i> Adicionar Candidatos
+                        <input type="file" multiple accept="image/*" class="hidden" onchange="handleUpload(event, 'candidatos')">
+                    </label>
+
+                    <button onclick="saveProject()" class="hover:text-blue-200 flex items-center gap-1 border-l border-blue-400 pl-4 ml-2 transition" title="Salvar projeto para editar depois">
+                        <i class="ph ph-floppy-disk text-xl"></i> Salvar Projeto
+                    </button>
+                    <label class="cursor-pointer hover:text-blue-200 flex items-center gap-1 border-l border-blue-400 pl-4 ml-2 transition" title="Abrir projeto salvo anteriormente">
+                        <i class="ph ph-folder-open text-xl"></i> Abrir Projeto
+                        <input type="file" accept=".campanha" class="hidden" onchange="openProject(event)">
+                    </label>
+                    <button onclick="clearSystemData()" class="hover:text-red-200 flex items-center gap-1 border-l border-blue-400 pl-4 ml-2" title="Apagar fotos enviadas">
+                        <i class="ph ph-trash"></i> Apagar Tudo
+                    </button>
+                    <button onclick="openConfig()" class="hover:text-blue-200 flex items-center gap-1 border-l border-blue-400 pl-4 ml-2 transition">
+                        <i class="ph ph-gear text-xl"></i> Configurações
+                    </button>
+                </div>
+            </div>
+            <div id="candidates-container" class="flex-1 overflow-x-auto flex items-center gap-4 px-4 py-2 bg-gray-100">
+                <p id="no-candidates-msg" class="text-gray-400 italic text-sm">Nenhum candidato adicionado. Faça o upload das fotos.</p>
+            </div>
+        </header>
+
+        <div class="flex flex-1 overflow-hidden">
+            
+            <aside class="w-[350px] shrink-0 bg-white border-r border-gray-200 flex flex-col shadow-lg z-10">
+                <div class="flex border-b border-gray-200">
+                    <button onclick="switchTab('fundos')" id="tab-fundos" class="flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50">Fundos</button>
+                    <button onclick="switchTab('imagens')" id="tab-imagens" class="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50">Imagens</button>
+                    <button onclick="switchTab('textos')" id="tab-textos" class="flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50">FontArt</button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 bg-gray-50 relative">
+                    
+                    <div id="panel-fundos" class="flex flex-col gap-4">
+                        
+                        <div id="search-fundos-box" class="hidden bg-white p-2 rounded shadow-sm border border-gray-200 flex gap-2">
+                            <input type="text" id="search-fundos-input" placeholder="Buscar fundos na web..." class="w-full text-sm outline-none px-2" onkeypress="if(event.key === 'Enter') searchPixabay('fundo')">
+                            <button onclick="searchPixabay('fundo')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded transition"><i class="ph ph-magnifying-glass font-bold"></i></button>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i class="ph ph-upload"></i> Meus Uploads</h4>
+                                <label class="cursor-pointer text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded font-bold transition">
+                                    + Adicionar
+                                    <input type="file" multiple accept="image/*" class="hidden" onchange="handleUpload(event, 'fundos')">
+                                </label>
+                            </div>
+                            <div id="local-fundos" class="grid grid-cols-2 gap-3"></div>
+                        </div>
+                        
+                        <div id="container-web-fundos" class="hidden pb-4 border-t border-gray-200 pt-4 mt-2">
+                            <h4 class="text-xs font-bold text-blue-600 mb-2 uppercase flex items-center gap-1"><i class="ph ph-globe"></i> Pixabay (Internet)</h4>
+                            <div id="web-fundos" class="grid grid-cols-2 gap-3"></div>
+                        </div>
+                    </div>
+
+                    <div id="panel-imagens" class="hidden flex flex-col gap-4">
+                        
+                        <div id="search-imagens-box" class="hidden bg-white p-2 rounded shadow-sm border border-gray-200 flex gap-2">
+                            <input type="text" id="search-imagens-input" placeholder="Buscar ilustrações/adesivos..." class="w-full text-sm outline-none px-2" onkeypress="if(event.key === 'Enter') searchPixabay('imagem')">
+                            <button onclick="searchPixabay('imagem')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded transition"><i class="ph ph-magnifying-glass font-bold"></i></button>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="text-xs font-bold text-gray-500 uppercase flex items-center gap-1"><i class="ph ph-upload"></i> Meus Uploads</h4>
+                                <label class="cursor-pointer text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded font-bold transition">
+                                    + Adicionar
+                                    <input type="file" multiple accept="image/*" class="hidden" onchange="handleUpload(event, 'imagens')">
+                                </label>
+                            </div>
+                            <div id="local-imagens" class="grid grid-cols-2 gap-3"></div>
+                        </div>
+
+                        <div id="container-web-imagens" class="hidden pb-4 border-t border-gray-200 pt-4 mt-2">
+                            <h4 class="text-xs font-bold text-blue-600 mb-2 uppercase flex items-center gap-1"><i class="ph ph-globe"></i> Pixabay (Internet)</h4>
+                            <div id="web-imagens" class="grid grid-cols-2 gap-3"></div>
+                        </div>
+                    </div>
+
+                    <div id="panel-textos" class="hidden flex flex-col gap-3 pb-8">
+                        </div>
+
+                </div>
+            </aside>
+
+            <main class="flex-1 bg-gray-200 relative flex flex-col overflow-hidden" id="scroll-area">
+                <div class="h-14 bg-white border-b border-gray-300 flex items-center px-4 justify-between shrink-0 shadow-sm z-20 sticky top-0 overflow-x-auto">
+                    <div class="flex gap-3 items-center min-w-max">
+                        <span class="text-sm font-bold text-gray-700 flex items-center gap-1"><i class="ph ph-monitor-play text-lg"></i> Canvas 16:9</span>
+                        <div class="h-6 w-px bg-gray-300 mx-1"></div>
+                        
+                        <div class="flex gap-2 bg-gray-100 p-1 rounded-md border border-gray-200 items-center">
+                            <span class="text-xs font-bold text-gray-500 px-2 uppercase">Fundo:</span>
+                            <button onclick="toggleLockBackground()" id="btn-lock-bg" class="px-2 py-1 text-sm bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center gap-1 transition" title="Travar/Destravar Fundo">
+                                <i class="ph ph-lock-open text-gray-600" id="icon-lock-bg"></i> Destravado
+                            </button>
+                            <button onclick="deleteBackground()" id="btn-remove-bg" class="px-2 py-1 text-sm bg-red-50 text-red-600 border border-red-200 rounded hover:bg-red-100 flex items-center gap-1 transition">
+                                <i class="ph ph-trash"></i> Remover
+                            </button>
+                        </div>
+
+                        <div id="text-toolbar" class="hidden flex items-center gap-2 ml-2 bg-blue-50 p-1 px-3 rounded border border-blue-200">
+                            <i class="ph ph-palette text-blue-600"></i>
+                            <span class="text-xs font-bold text-blue-800">Cor:</span>
+                            <input type="color" id="font-color-picker" oninput="changeFontColor(this.value)" class="w-6 h-6 cursor-pointer border-0 p-0 rounded bg-transparent">
+                            
+                            <div class="h-4 w-px bg-blue-300 mx-1"></div>
+                            
+                            <i class="ph ph-text-t text-blue-600"></i>
+                            <span class="text-xs font-bold text-blue-800">Tamanho:</span>
+                            <input type="range" id="font-size-slider" min="20" max="400" value="60" oninput="changeFontSize(this.value)" class="w-24 cursor-pointer">
+                            <span id="font-size-display" class="text-xs font-bold text-blue-800 w-10">60px</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-2 shrink-0">
+                        <button onclick="clearWorkspace()" class="px-4 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded flex items-center gap-1 transition border border-red-200">
+                            <i class="ph ph-eraser"></i> Limpar Tela
+                        </button>
+                        <button onclick="exportImage()" class="px-5 py-1.5 text-sm font-bold bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2 transition shadow-md">
+                            <i class="ph ph-download-simple text-lg"></i> Baixar Full HD
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quadro Centalizado e Responsivo com Prevenção FOUC (Fade-in) -->
+                <div class="flex-1 flex items-center justify-center p-6 overflow-hidden" id="workspace-container">
+                    <div id="workspace-wrapper" class="opacity-0 transition-opacity duration-300 ease-in-out">
+                        <div id="workspace">
+                            </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="config-modal" class="hidden fixed inset-0 z-[110] bg-black/60 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full transform transition-all">
+            <div class="flex justify-between items-center border-b border-gray-200 pb-4 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="ph ph-gear text-blue-600"></i> Configurações
+                </h2>
+                <button onclick="closeConfig()" class="text-gray-400 hover:text-red-500 transition">
+                    <i class="ph ph-x text-2xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-800 flex items-center gap-2 mb-2">
+                        <i class="ph ph-globe"></i> Ativar Busca na Internet
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Para pesquisar imagens no banco gratuito do Pixabay, é necessário inserir uma chave API própria. 
+                        A chave ficará salva em segurança apenas neste computador.
+                    </p>
+                    
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Chave API (Pixabay Key)</label>
+                    <input type="text" id="api-key-input" placeholder="Cole a sua chave aqui (ex: 8756315-cf9...)" 
+                           class="w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono text-sm text-gray-800">
+                </div>
+
+                <div class="flex justify-between pt-4">
+                    <button onclick="deleteApiKey()" id="btn-delete-api" class="hidden px-4 py-2 text-sm font-bold text-red-600 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition">
+                        Remover Chave
+                    </button>
+                    <div class="flex gap-2 ml-auto">
+                        <button onclick="closeConfig()" class="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded transition">Cancelar</button>
+                        <button onclick="saveApiKey()" class="px-6 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded shadow-md transition">Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-confirm" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full transform transition-all text-center">
+            <i class="ph ph-warning-circle text-5xl text-red-500 mb-3"></i>
+            <h2 id="confirm-title" class="text-xl font-bold text-gray-800 mb-2">Atenção</h2>
+            <p id="confirm-message" class="text-gray-600 mb-6 text-sm">Tem certeza?</p>
+            <div class="flex justify-center gap-3">
+                <button id="confirm-btn-cancel" class="px-5 py-2 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition">Cancelar</button>
+                <button id="confirm-btn-ok" class="px-5 py-2 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-md transition">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-alert" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full transform transition-all text-center">
+            <i class="ph ph-info text-5xl text-blue-500 mb-3"></i>
+            <h2 id="alert-title" class="text-xl font-bold text-gray-800 mb-2">Aviso</h2>
+            <p id="alert-message" class="text-gray-600 mb-6 text-sm">Mensagem</p>
+            <div class="flex justify-center">
+                <button id="alert-btn-ok" class="px-8 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-modal" class="hidden fixed inset-0 z-[100] bg-black/70 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center">
+            <i class="ph ph-circle-notch animate-spin text-5xl text-blue-600 mb-4"></i>
+            <p class="font-bold text-gray-800 text-lg" id="loading-text">Processando imagem em Alta Qualidade...</p>
+            <p class="text-sm text-gray-500 mt-2">Aguarde enquanto a operação é concluída.</p>
+        </div>
+    </div>
+
+    <script>
+        /* === DIÁLOGOS PERSONALIZADOS === */
+        function customConfirm(title, message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('custom-confirm');
+                document.getElementById('confirm-title').innerText = title;
+                document.getElementById('confirm-message').innerText = message;
+                modal.classList.remove('hidden');
+
+                document.getElementById('confirm-btn-ok').onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(true);
+                };
+                document.getElementById('confirm-btn-cancel').onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve(false);
+                };
+            });
+        }
+
+        function customAlert(title, message) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('custom-alert');
+                document.getElementById('alert-title').innerText = title;
+                document.getElementById('alert-message').innerText = message;
+                modal.classList.remove('hidden');
+
+                document.getElementById('alert-btn-ok').onclick = () => {
+                    modal.classList.add('hidden');
+                    resolve();
+                };
+            });
+        }
+
+        /* === CONFIGURAÇÕES & API === */
+        let PIXABAY_API_KEY = null; 
+
+        /* === ESTADO DO SISTEMA === */
+        const state = {
+            fileMap: {}, // ID para URL
+            candidatos: [],
+            fundos: [],
+            imagens: [],
+            elementCounter: 0,
+            selectedElement: null,
+            bgLocked: false,
+            _restoring: false   // flag: bloqueia saveWorkspaceState durante loadWorkspaceState
+        };
+
+        const FONTARTS = [
+            { class: 'fa-1', name: 'Básico' }, { class: 'fa-2', name: 'Impacto Clássico' },
+            { class: 'fa-3', name: 'Atenção' }, { class: 'fa-4', name: 'Esporte' },
+            { class: 'fa-5', name: 'Neon Azul' }, { class: 'fa-6', name: 'Neon Rosa' },
+            { class: 'fa-7', name: 'Retrô' }, { class: 'fa-8', name: 'Pixel/Gamer' },
+            { class: 'fa-9', name: 'Terror' }, { class: 'fa-10', name: 'Urbano' },
+            { class: 'fa-11', name: 'Ouro Elegante' }, { class: 'fa-12', name: 'Bala/Doce' },
+            { class: 'fa-13', name: 'Quadrinhos' }, { class: 'fa-14', name: 'Gradiente' },
+            { class: 'fa-15', name: 'Metal 3D' }, { class: 'fa-16', name: 'Disco' },
+            { class: 'fa-17', name: 'Letreiro' }, { class: 'fa-18', name: 'Militar' },
+            { class: 'fa-19', name: 'Divertido' }, { class: 'fa-20', name: 'Moderno' }
+        ];
+
+        const workspace = document.getElementById('workspace');
+
+        /* === INICIALIZAÇÃO === */
+        window.onload = async () => {
+            initFontArts();
+            
+            // LER CHAVE SALVA
+            const savedKey = localStorage.getItem('pixabay_api_key');
+            if (savedKey) {
+                PIXABAY_API_KEY = savedKey;
+                activateWebSearch();
+            }
+            
+            await loadAssetsFromDB(); 
+            await loadWorkspaceState(); // CRÍTICO: precisa de await pois é async
+            
+            // Força o primeiro cálculo IMEDIATAMENTE para evitar o FOUC
+            adjustWorkspaceScale();
+            
+            // OTIMIZAÇÃO: ResizeObserver vigia as alterações de janela
+            const container = document.getElementById('workspace-container');
+            if (container) {
+                new ResizeObserver(() => adjustWorkspaceScale()).observe(container);
+            }
+        };
+
+        /* === GESTÃO DA CHAVE API (MENU) === */
+        function openConfig() {
+            const modal = document.getElementById('config-modal');
+            const input = document.getElementById('api-key-input');
+            const btnDelete = document.getElementById('btn-delete-api');
+            
+            // Máscara de segurança
+            input.value = PIXABAY_API_KEY ? '********************************' : '';
+            
+            if (PIXABAY_API_KEY) btnDelete.classList.remove('hidden');
+            else btnDelete.classList.add('hidden');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeConfig() {
+            document.getElementById('config-modal').classList.add('hidden');
+        }
+
+        async function saveApiKey() {
+            const val = document.getElementById('api-key-input').value.trim();
+            
+            if (val && val !== '********************************') {
+                PIXABAY_API_KEY = val;
+                localStorage.setItem('pixabay_api_key', val);
+                activateWebSearch();
+                await customAlert("Configurações", "Chave salva com sucesso! Busca na internet ativada.");
+                closeConfig();
+            } else if (!val) {
+                deleteApiKey();
+            } else {
+                closeConfig();
+            }
+        }
+
+        async function deleteApiKey() {
+            PIXABAY_API_KEY = null;
+            localStorage.removeItem('pixabay_api_key');
+            
+            document.getElementById('search-fundos-box').classList.add('hidden');
+            document.getElementById('search-imagens-box').classList.add('hidden');
+            document.getElementById('container-web-fundos').classList.add('hidden');
+            document.getElementById('container-web-imagens').classList.add('hidden');
+            
+            document.getElementById('web-fundos').innerHTML = '';
+            document.getElementById('web-imagens').innerHTML = '';
+            
+            closeConfig();
+            await customAlert("Configurações", "A chave foi removida. A busca na internet está desativada.");
+        }
+
+        function activateWebSearch() {
+            document.getElementById('search-fundos-box').classList.remove('hidden');
+            document.getElementById('search-imagens-box').classList.remove('hidden');
+        }
+
+        /* === BANCO DE DADOS LOCAL (Singleton) === */
+        let _dbInstance = null;
+        function initDB() {
+            if (_dbInstance) return Promise.resolve(_dbInstance);
+            return new Promise((resolve, reject) => {
+                // IMPORTANTE: mantemos a versão 1 para não perder dados já salvos.
+                // A migração para v2 pode apagar registros em alguns browsers.
+                const req = indexedDB.open('CampanhaAssetsDB', 1);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('assets')) {
+                        db.createObjectStore('assets', { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = () => { _dbInstance = req.result; resolve(_dbInstance); };
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveAssetToDB(type, file) {
+            const db = await initDB();
+            const id = type + '_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+            // Salva como Blob puro com mimeType explícito em campo separado.
+            // O objeto File pode ser reconstruído sem .type após fechamento abrupto
+            // do browser, fazendo o createObjectURL falhar silenciosamente.
+            const mimeType = file.type || 'image/jpeg';
+            const blob = new Blob([await file.arrayBuffer()], { type: mimeType });
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('assets', 'readwrite');
+                tx.objectStore('assets').put({ id, type, mimeType, file: blob });
+                tx.oncomplete = () => resolve(id);
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function loadAssetsFromDB() {
+            try {
+                const db = await initDB();
+                const assets = await new Promise((resolve, reject) => {
+                    const tx = db.transaction('assets', 'readonly');
+                    const req = tx.objectStore('assets').getAll();
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                    tx.onerror = () => reject(tx.error);
+                });
+
+                await Promise.all(assets.map(async (asset) => {
+                    try {
+                        const mimeType = asset.mimeType || asset.file?.type || 'image/jpeg';
+                        const buffer = await asset.file.arrayBuffer();
+                        if (buffer.byteLength === 0) return;
+                        const blob = new Blob([buffer], { type: mimeType });
+                        const url = URL.createObjectURL(blob);
+                        if (state[asset.type]) {
+                            state[asset.type].push({ path: asset.id, url });
+                        }
+                        state.fileMap[asset.id] = url;
+                    } catch (assetErr) {
+                        console.warn(`Asset ${asset.id} não pôde ser carregado:`, assetErr);
+                    }
+                }));
+
+                renderUI();
+            } catch (err) {
+                console.error('Erro ao carregar assets do banco de dados:', err);
+            }
+        }
+
+        async function clearSystemData() {
+            const confirmado = await customConfirm("Limpar Tudo", "Isso apagará todas as imagens que você enviou e limpará o seu quadro. Tem certeza?");
+            if(!confirmado) return;
+            
+            if (_dbInstance) { _dbInstance.close(); _dbInstance = null; }
+            indexedDB.deleteDatabase('CampanhaAssetsDB');
+            localStorage.removeItem('campanha_workspace');
+            location.reload();
+        }
+
+        /* === SALVAR / ABRIR PROJETO (.campanha) ===
+         *
+         * Formato do arquivo:
+         *   JSON com dois campos:
+         *     - workspace : o mesmo objeto que já vai para o localStorage
+         *     - assets    : { [id]: { type, mimeType, b64: string } }
+         *
+         * Performance:
+         *   - Imagens são lidas como ArrayBuffer e convertidas para base64
+         *     via Uint8Array → string em chunks (evita stack overflow em imagens grandes).
+         *   - Na abertura, base64 → Blob → Object URL diretamente na memória,
+         *     sem tocar no IndexedDB (mais rápido). O IndexedDB só é escrito se
+         *     o usuário fizer upload manualmente; os assets do projeto ficam apenas
+         *     no state.fileMap enquanto a sessão durar.
+         *   - A leitura de cada blob do DB usa getAll() em uma única transação.
+         */
+
+        // Converte ArrayBuffer para string base64 em chunks seguros (sem stack overflow)
+        function arrayBufferToBase64(buffer) {
+            const bytes = new Uint8Array(buffer);
+            const chunkSize = 8192;
+            let binary = '';
+            for (let i = 0; i < bytes.length; i += chunkSize) {
+                binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+            }
+            return btoa(binary);
+        }
+
+        // Converte base64 de volta para Blob
+        function base64ToBlob(b64, mimeType) {
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return new Blob([bytes], { type: mimeType });
+        }
+
+        async function saveProject() {
+            const loading = document.getElementById('loading-modal');
+            const loadingText = document.getElementById('loading-text');
+            loadingText.textContent = 'Preparando projeto para salvar...';
+            loading.classList.remove('hidden');
+
+            try {
+                // 1. Coleta o estado atual do workspace
+                const workspaceData = JSON.parse(localStorage.getItem('campanha_workspace') || '{"elements":[],"bgLocked":false}');
+
+                // 2. Coleta todos os assets do IndexedDB em UMA transação
+                const db = await initDB();
+                const allAssets = await new Promise((resolve, reject) => {
+                    const tx = db.transaction('assets', 'readonly');
+                    const req = tx.objectStore('assets').getAll();
+                    req.onsuccess = () => resolve(req.result);
+                    req.onerror = () => reject(req.error);
+                });
+
+                // 3. Descobre quais IDs de assets estão realmente em uso no workspace
+                //    (ignora imagens que foram deletadas da tela)
+                const usedPaths = new Set(
+                    workspaceData.elements
+                        .filter(el => !el.isText && el.path && !el.path.startsWith('http'))
+                        .map(el => el.path)
+                );
+
+                // 4. Converte apenas os assets em uso para base64 (paralelismo com Promise.all)
+                loadingText.textContent = 'Compactando imagens...';
+                const assetsMap = {};
+                await Promise.all(
+                    allAssets
+                        .filter(asset => usedPaths.has(asset.id))
+                        .map(async (asset) => {
+                            const buffer = await asset.file.arrayBuffer();
+                            assetsMap[asset.id] = {
+                                type: asset.type,
+                                mimeType: asset.file.type || 'image/jpeg',
+                                b64: arrayBufferToBase64(buffer)
+                            };
+                        })
+                );
+
+                // 5. Monta o arquivo final e dispara o download
+                loadingText.textContent = 'Salvando arquivo...';
+                const projectData = { version: 1, workspace: workspaceData, assets: assetsMap };
+                const blob = new Blob([JSON.stringify(projectData)], { type: 'application/json' });
+
+                // Tenta File System Access API (Tauri / Chrome moderno) → fallback para download
+                try {
+                    if (window.showSaveFilePicker) {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: 'meu-projeto.campanha',
+                            types: [{ description: 'Projeto Campanha CPII', accept: { 'application/json': ['.campanha'] } }]
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                    } else {
+                        throw new Error('fallback');
+                    }
+                } catch (err) {
+                    if (err.name === 'AbortError') return; // usuário cancelou o picker
+                    // Fallback: download direto
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = 'meu-projeto.campanha';
+                    document.body.appendChild(a); a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+
+                await customAlert('Projeto Salvo!', 'O arquivo .campanha foi salvo. Abra-o neste aplicativo para continuar editando.');
+
+            } catch (err) {
+                console.error('Erro ao salvar projeto:', err);
+                await customAlert('Erro', 'Não foi possível salvar o projeto. Tente novamente.');
+            } finally {
+                loading.classList.add('hidden');
+                loadingText.textContent = 'Processando imagem em Alta Qualidade...'; // restaura texto padrão
+            }
+        }
+
+        async function openProject(event) {
+            const file = event.target.files[0];
+            event.target.value = ''; // permite abrir o mesmo arquivo novamente se necessário
+            if (!file) return;
+
+            const loading = document.getElementById('loading-modal');
+            const loadingText = document.getElementById('loading-text');
+            loadingText.textContent = 'Abrindo projeto...';
+            loading.classList.remove('hidden');
+
+            try {
+                // 1. Lê e parseia o arquivo
+                const text = await file.text();
+                const projectData = JSON.parse(text);
+
+                if (!projectData.workspace || !projectData.assets) {
+                    throw new Error('Arquivo inválido ou corrompido.');
+                }
+
+                // 2. Limpa o IndexedDB atual e reseta o estado
+                loadingText.textContent = 'Restaurando imagens...';
+
+                if (_dbInstance) { _dbInstance.close(); _dbInstance = null; }
+                await new Promise(res => { const r = indexedDB.deleteDatabase('CampanhaAssetsDB'); r.onsuccess = res; r.onerror = res; });
+
+                Object.values(state.fileMap).forEach(url => {
+                    if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
+                });
+                state.fileMap = {};
+                state.candidatos = [];
+                state.fundos = [];
+                state.imagens = [];
+
+                // 3. Converte base64 → Blob e salva no IndexedDB (igual a um upload normal)
+                //    Isso garante que fechar o browser após abrir um projeto não perde as imagens.
+                const db = await initDB();
+                await Promise.all(Object.entries(projectData.assets).map(async ([id, asset]) => {
+                    const blob = base64ToBlob(asset.b64, asset.mimeType);
+                    const url = URL.createObjectURL(blob);
+                    state.fileMap[id] = url;
+                    if (state[asset.type]) state[asset.type].push({ path: id, url });
+
+                    // Persiste no IndexedDB com o mesmo ID original do projeto
+                    return new Promise((resolve, reject) => {
+                        const tx = db.transaction('assets', 'readwrite');
+                        tx.objectStore('assets').put({ id, type: asset.type, mimeType: asset.mimeType, file: blob });
+                        tx.oncomplete = resolve;
+                        tx.onerror = () => reject(tx.error);
+                    });
+                }));
+
+                // 4. Carrega o workspace
+                loadingText.textContent = 'Restaurando canvas...';
+                localStorage.setItem('campanha_workspace', JSON.stringify(projectData.workspace));
+                workspace.innerHTML = '';
+                state.elementCounter = 0;
+                state.bgLocked = false;
+
+                await loadWorkspaceState();
+                renderUI();
+
+                await customAlert('Projeto Aberto!', 'Seu projeto foi carregado com sucesso. Continue editando!');
+
+            } catch (err) {
+                console.error('Erro ao abrir projeto:', err);
+                await customAlert('Erro ao Abrir', 'O arquivo selecionado não é um projeto válido ou está corrompido.');
+            } finally {
+                loading.classList.add('hidden');
+                loadingText.textContent = 'Processando imagem em Alta Qualidade...';
+            }
+        }
+
+        /* === UPLOADS === */
+        async function handleUpload(e, type) {
+            const files = e.target.files;
+            if(!files || files.length === 0) return;
+
+            document.body.style.cursor = 'wait';
+
+            for(let file of files) {
+                const id = await saveAssetToDB(type, file);
+                const url = URL.createObjectURL(file);
+                
+                state[type].push({ path: id, url: url });
+                state.fileMap[id] = url;
+            }
+            
+            renderUI();
+            e.target.value = ''; 
+            document.body.style.cursor = 'default';
+        }
+
+        /* === PIXABAY API === */
+        async function searchPixabay(type) {
+            if(!PIXABAY_API_KEY) {
+                await customAlert("Atenção", "Por favor, configure a chave API nas Configurações.");
+                return; 
+            }
+            
+            const inputId = type === 'fundo' ? 'search-fundos-input' : 'search-imagens-input';
+            const query = document.getElementById(inputId).value;
+            if (!query.trim()) return;
+
+            const imageType = type === 'fundo' ? 'photo&orientation=horizontal' : 'illustration';
+            const url = `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(query)}&lang=pt&image_type=${imageType}&per_page=20`;
+
+            const btn = document.querySelector(`#${inputId} + button`);
+            const oldIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="ph ph-spinner animate-spin"></i>';
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("Chave inválida ou limite atingido.");
+                const data = await res.json();
+                renderPixabayResults(data.hits, type);
+            } catch (err) {
+                await customAlert("Erro na Pesquisa", "Erro ao pesquisar imagens. Verifique se a sua chave Pixabay é válida.");
+            } finally {
+                btn.innerHTML = oldIcon;
+            }
+        }
+
+        function renderPixabayResults(images, type) {
+            const containerId = type === 'fundo' ? 'web-fundos' : 'web-imagens';
+            const wrapperId = type === 'fundo' ? 'container-web-fundos' : 'container-web-imagens';
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = '';
+            document.getElementById(wrapperId).classList.remove('hidden');
+
+            if (images.length === 0) {
+                container.innerHTML = '<p class="col-span-2 text-xs text-gray-500">Nenhum resultado encontrado.</p>';
+                return;
+            }
+
+            images.forEach(img => {
+                const div = document.createElement('div');
+                div.className = type === 'fundo' 
+                    ? 'aspect-video bg-gray-200 rounded cursor-pointer overflow-hidden hover:ring-2 hover:ring-blue-500'
+                    : 'aspect-square bg-white rounded border border-gray-200 p-2 cursor-pointer flex items-center justify-center hover:shadow-md transition';
+                
+                const highResUrl = img.largeImageURL || img.webformatURL;
+                
+                div.onclick = () => {
+                    if(type === 'fundo') setBackground(highResUrl, highResUrl);
+                    else addImageToCanvas(highResUrl, highResUrl);
+                };
+                
+                div.innerHTML = `<img src="${img.previewURL}" class="${type === 'fundo' ? 'w-full h-full object-cover' : 'max-w-full max-h-full object-contain'}" crossorigin="anonymous">`;
+                container.appendChild(div);
+            });
+        }
+
+        /* === SALVAMENTO AUTOMÁTICO NA MEMÓRIA DO NAVEGADOR === */
+        function saveWorkspaceState() {
+            if (state._restoring) return; // não salva durante restauração de projeto
+            const elements = [];
+            document.querySelectorAll('.canvas-element').forEach(el => {
+                const isBg = el.id === 'bg-layer';
+                const isText = el.querySelector('.canvas-text') !== null;
+                const textNode = isText ? el.querySelector('.canvas-text') : null;
+                
+                elements.push({
+                    id: el.id,
+                    isBg: isBg,
+                    isText: isText,
+                    path: !isText ? el.dataset.path : null,
+                    content: isText ? textNode.innerHTML : null,
+                    fontClass: isText ? Array.from(textNode.classList).find(c => c.startsWith('fa-')) : null,
+                    fontSize: isText ? textNode.style.fontSize : null,
+                    fontColor: isText ? textNode.style.color : null,
+                    left: el.style.left,
+                    top: el.style.top,
+                    width: el.style.width,
+                    height: el.style.height,
+                    zIndex: el.style.zIndex
+                });
+            });
+
+            const data = { elements, bgLocked: state.bgLocked };
+            localStorage.setItem('campanha_workspace', JSON.stringify(data));
+        }
+
+        async function loadWorkspaceState() {
+            const saved = localStorage.getItem('campanha_workspace');
+            if (!saved) return;
+            
+            try {
+                const data = JSON.parse(saved);
+                workspace.innerHTML = '';
+                state.elementCounter = 0;
+                state._restoring = true;
+
+                for (const item of data.elements) {
+                    const idNum = parseInt(item.id.replace('el_', '')) || 0;
+                    if (idNum > state.elementCounter) state.elementCounter = idNum;
+
+                    if (item.isText) {
+                        addText(item.fontClass, item);
+                    } else {
+                        const isWeb = item.path && item.path.startsWith('http');
+                        let url = isWeb ? item.path : state.fileMap[item.path];
+
+                        // Fallback: se a URL não está no fileMap (raro mas possível),
+                        // busca o asset diretamente do IndexedDB
+                        if (!url && !isWeb && item.path) {
+                            try {
+                                const db = await initDB();
+                                const asset = await new Promise((res, rej) => {
+                                    const tx = db.transaction('assets', 'readonly');
+                                    const req = tx.objectStore('assets').get(item.path);
+                                    req.onsuccess = () => res(req.result);
+                                    req.onerror = () => rej(req.error);
+                                });
+                                if (asset?.file) {
+                                    const mimeType = asset.mimeType || asset.file.type || 'image/jpeg';
+                                    const buffer = await asset.file.arrayBuffer();
+                                    const blob = new Blob([buffer], { type: mimeType });
+                                    url = URL.createObjectURL(blob);
+                                    state.fileMap[item.path] = url;
+                                }
+                            } catch (e) {
+                                console.warn('Fallback DB falhou para', item.path, e);
+                            }
+                        }
+
+                        if (url) {
+                            if (item.isBg) setBackground(item.path, url, item);
+                            else addImageToCanvas(item.path, url, item);
+                        }
+                    }
+                }
+
+                if (data.bgLocked) {
+                    state.bgLocked = false;
+                    toggleLockBackground();
+                }
+
+                state._restoring = false;
+                saveWorkspaceState();
+
+            } catch (e) {
+                state._restoring = false;
+                console.error("Erro ao carregar o estado", e);
+            }
+        }
+
+        // Salvar apenas após interações que modificam o canvas, não em todo mouseup do documento
+        workspace.addEventListener('input', saveWorkspaceState);
+
+        /* === INTERFACE E RESPONSIVIDADE === */
+        function initFontArts() {
+            const container = document.getElementById('panel-textos');
+            FONTARTS.forEach(fa => {
+                const div = document.createElement('div');
+                div.className = 'cursor-pointer border border-gray-300 rounded p-4 bg-white text-center hover:bg-blue-50 transition shadow-sm overflow-hidden';
+                div.onclick = () => addText(fa.class);
+                div.innerHTML = `<span class="${fa.class} text-3xl block w-full whitespace-nowrap overflow-hidden text-ellipsis">${fa.name}</span>`;
+                container.appendChild(div);
+            });
+        }
+
+        function renderUI() {
+            const candContainer = document.getElementById('candidates-container');
+            const fundosContainer = document.getElementById('local-fundos');
+            const imagensContainer = document.getElementById('local-imagens');
+            const msgNoCand = document.getElementById('no-candidates-msg');
+            
+            candContainer.querySelectorAll('button').forEach(b => b.remove());
+            fundosContainer.innerHTML = ''; imagensContainer.innerHTML = '';
+
+            if (state.candidatos.length > 0) {
+                if(msgNoCand) msgNoCand.style.display = 'none';
+                state.candidatos.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'h-24 w-24 shrink-0 rounded-full border-4 border-white shadow-md overflow-hidden hover:scale-105 transition bg-white';
+                    btn.onclick = () => addImageToCanvas(item.path, item.url);
+                    btn.innerHTML = `<img src="${item.url}" class="w-full h-full object-cover">`;
+                    candContainer.appendChild(btn);
+                });
+            } else {
+                if(msgNoCand) msgNoCand.style.display = 'block';
+            }
+
+            state.fundos.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'aspect-video bg-gray-200 rounded cursor-pointer overflow-hidden hover:ring-2 hover:ring-blue-500';
+                div.onclick = () => setBackground(item.path, item.url);
+                div.innerHTML = `<img src="${item.url}" class="w-full h-full object-cover">`;
+                fundosContainer.appendChild(div);
+            });
+
+            state.imagens.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'aspect-square bg-white rounded border border-gray-200 p-2 cursor-pointer flex items-center justify-center hover:shadow-md transition';
+                div.onclick = () => addImageToCanvas(item.path, item.url);
+                div.innerHTML = `<img src="${item.url}" class="max-w-full max-h-full object-contain">`;
+                imagensContainer.appendChild(div);
+            });
+        }
+
+        function switchTab(tabName) {
+            ['fundos', 'imagens', 'textos'].forEach(name => {
+                document.getElementById(`tab-${name}`).className = 'flex-1 py-3 text-sm font-bold text-gray-500 hover:bg-gray-50 border-b-2 border-transparent';
+                document.getElementById(`panel-${name}`).classList.add('hidden');
+            });
+            document.getElementById(`tab-${tabName}`).className = 'flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50';
+            document.getElementById(`panel-${tabName}`).classList.remove('hidden');
+        }
+
+        function adjustWorkspaceScale() {
+            const container = document.getElementById('workspace-container');
+            const wrapper = document.getElementById('workspace-wrapper');
+            if(!container || !wrapper) return;
+            
+            const paddingX = 48;
+            const paddingY = 48;
+            
+            // Impede que o quadro recolha para tamanho 0 ou inferior quando os painéis mudam 
+            const cw = Math.max(1, container.clientWidth - paddingX);
+            const ch = Math.max(1, container.clientHeight - paddingY);
+            
+            const scale = Math.min(cw / 1920, ch / 1080);
+
+            workspace.style.transform = `scale(${scale})`;
+            wrapper.style.width = `${1920 * scale}px`;
+            wrapper.style.height = `${1080 * scale}px`;
+
+            // Revela a área de trabalho suavemente apenas após a escala ter sido matematicamente fixada, prevenindo o FOUC
+            wrapper.classList.remove('opacity-0');
+        }
+
+        /* === MANIPULAÇÃO DO CANVAS === */
+        workspace.addEventListener('mousedown', (e) => { if (e.target === workspace) deselectAll(); });
+        workspace.addEventListener('touchstart', (e) => { if (e.target === workspace) deselectAll(); });
+
+        function createWrapper(id, restoreData = null, isText = false) {
+            const wrapper = document.createElement('div');
+            wrapper.id = id || ('el_' + (++state.elementCounter));
+            wrapper.className = 'canvas-element';
+            
+            wrapper.style.left = restoreData ? restoreData.left : '400px';
+            wrapper.style.top = restoreData ? restoreData.top : '200px';
+            wrapper.style.width = restoreData ? restoreData.width : '600px';
+            wrapper.style.height = restoreData ? restoreData.height : '400px';
+            wrapper.style.zIndex = restoreData ? restoreData.zIndex : state.elementCounter;
+
+            const controls = document.createElement('div');
+            controls.className = 'controls-layer';
+            
+            const delBtn = document.createElement('div');
+            delBtn.className = 'delete-btn';
+            delBtn.innerHTML = '<i class="ph ph-x text-lg"></i>';
+            delBtn.onclick = (e) => { e.stopPropagation(); wrapper.remove(); deselectAll(); saveWorkspaceState(); };
+            controls.appendChild(delBtn);
+
+            if (isText) {
+                const hRight = document.createElement('div'); hRight.className = 'resize-handle resize-right'; hRight.dataset.dir = 'e';
+                const hBottom = document.createElement('div'); hBottom.className = 'resize-handle resize-bottom'; hBottom.dataset.dir = 's';
+                const hCorner = document.createElement('div'); hCorner.className = 'resize-handle resize-corner'; hCorner.dataset.dir = 'se';
+                
+                [hRight, hBottom, hCorner].forEach(h => {
+                    h.addEventListener('mousedown', startResize);
+                    h.addEventListener('touchstart', startResize, {passive: false});
+                    controls.appendChild(h);
+                });
+            } else {
+                const hCorner = document.createElement('div'); hCorner.className = 'resize-handle resize-corner'; hCorner.dataset.dir = 'se';
+                hCorner.addEventListener('mousedown', startResize);
+                hCorner.addEventListener('touchstart', startResize, {passive: false});
+                controls.appendChild(hCorner);
+            }
+
+            wrapper.appendChild(controls);
+            wrapper.addEventListener('mousedown', startDrag);
+            wrapper.addEventListener('touchstart', startDrag, {passive: false});
+
+            workspace.appendChild(wrapper);
+            return wrapper;
+        }
+
+        async function setBackground(path, url, restoreData = null) {
+            if(state.bgLocked && !restoreData) {
+                await customAlert("Aviso", "O fundo está travado! Destrave-o antes de tentar alterar.");
+                return;
+            }
+            
+            const oldBg = document.getElementById('bg-layer');
+            if(oldBg) oldBg.remove();
+            
+            const wrapper = createWrapper('bg-layer', restoreData, false);
+            wrapper.classList.add('bg-element');
+            wrapper.dataset.path = path;
+            
+            if(!restoreData) {
+                wrapper.style.left = '0px'; wrapper.style.top = '0px';
+                wrapper.style.width = '1920px'; wrapper.style.height = '1080px';
+                wrapper.style.zIndex = '0';
+            }
+
+            const img = document.createElement('img');
+            if (url.startsWith('http')) img.crossOrigin = "anonymous";
+            img.src = url;
+            wrapper.insertBefore(img, wrapper.firstChild);
+            
+            if(state.bgLocked) wrapper.classList.add('locked');
+            else selectElement(wrapper);
+            
+            saveWorkspaceState();
+        }
+
+        async function deleteBackground() {
+            if (state.bgLocked) {
+                await customAlert("Aviso", "O fundo está travado! Clique em 'Destravado' para permitir a remoção.");
+                return;
+            }
+            const bg = document.getElementById('bg-layer');
+            if(bg) bg.remove();
+            saveWorkspaceState();
+        }
+
+        function toggleLockBackground() {
+            const bg = document.getElementById('bg-layer');
+            const icon = document.getElementById('icon-lock-bg');
+            const btn = document.getElementById('btn-lock-bg');
+            const btnRemove = document.getElementById('btn-remove-bg');
+            
+            state.bgLocked = !state.bgLocked;
+            
+            if (state.bgLocked) {
+                if(bg) {
+                    bg.classList.add('locked');
+                    if(state.selectedElement === bg) deselectAll();
+                }
+                icon.className = 'ph ph-lock text-red-600';
+                btn.innerHTML = '<i class="ph ph-lock text-red-600" id="icon-lock-bg"></i> Travado';
+                btnRemove.classList.add('btn-disabled');
+            } else {
+                if(bg) bg.classList.remove('locked');
+                icon.className = 'ph ph-lock-open text-gray-600';
+                btn.innerHTML = '<i class="ph ph-lock-open text-gray-600" id="icon-lock-bg"></i> Destravado';
+                btnRemove.classList.remove('btn-disabled');
+            }
+            saveWorkspaceState();
+        }
+
+        async function clearWorkspace() {
+            const confirmado = await customConfirm("Limpar Tela", "Tem certeza de que deseja apagar todos os itens do quadro?");
+            if(!confirmado) return;
+            
+            document.querySelectorAll('.canvas-element').forEach(el => el.remove());
+            state.selectedElement = null;
+            document.getElementById('text-toolbar').classList.add('hidden');
+            saveWorkspaceState();
+        }
+
+        function addImageToCanvas(path, url, restoreData = null) {
+            const wrapper = createWrapper(restoreData ? restoreData.id : null, restoreData, false);
+            wrapper.dataset.path = path;
+            
+            const img = document.createElement('img');
+            if (url.startsWith('http')) img.crossOrigin = "anonymous";
+            img.src = url;
+            wrapper.insertBefore(img, wrapper.firstChild);
+            
+            if(!restoreData) selectElement(wrapper);
+            saveWorkspaceState();
+        }
+
+        function addText(fontClass, restoreData = null) {
+            const wrapper = createWrapper(restoreData ? restoreData.id : null, restoreData, true);
+            if(!restoreData) {
+                wrapper.style.width = '800px';
+                wrapper.style.height = '200px';
+            }
+
+            const txtWrapper = document.createElement('div');
+            txtWrapper.className = 'text-wrapper';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = `canvas-text ${fontClass}`;
+            textDiv.contentEditable = "true";
+            textDiv.innerHTML = restoreData ? restoreData.content : "Edite este texto";
+            
+            if(restoreData && restoreData.fontSize) textDiv.style.fontSize = restoreData.fontSize;
+            if(restoreData && restoreData.fontColor) {
+                textDiv.style.color = restoreData.fontColor;
+                textDiv.style.webkitTextFillColor = restoreData.fontColor;
+            }
+            
+            textDiv.addEventListener('mousedown', (e) => {
+                if(state.selectedElement === wrapper) e.stopPropagation();
+            });
+            textDiv.addEventListener('touchstart', (e) => {
+                if(state.selectedElement === wrapper) e.stopPropagation();
+            }, {passive: false});
+
+            // FILTRO DE TEXTO PURO: Intercepta a colagem para evitar que estilos invisíveis entrem e causem o bug de tamanho no export
+            textDiv.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.originalEvent || e).clipboardData.getData('text/plain');
+                document.execCommand('insertText', false, text);
+            });
+
+            txtWrapper.appendChild(textDiv);
+            wrapper.insertBefore(txtWrapper, wrapper.firstChild);
+            
+            if(!restoreData) {
+                selectElement(wrapper);
+                setTimeout(() => { textDiv.focus(); document.execCommand('selectAll', false, null); }, 50);
+            }
+            saveWorkspaceState();
+        }
+
+        /* === SISTEMA DE SELEÇÃO E ESTILO DE FONTE === */
+        let activeAction = null; 
+        let resizeDir = null;
+        let activeItem = null;
+        let startX, startY, initialLeft, initialTop, initialWidth, initialHeight;
+
+        function getScale() {
+            const transform = workspace.style.transform;
+            if (!transform || !transform.includes('scale')) return 1;
+            const match = transform.match(/scale\(([\d.]+)\)/);
+            return match ? parseFloat(match[1]) : 1;
+        }
+
+        function rgbToHex(rgb) {
+            if (!rgb || rgb.indexOf("rgb") === -1) return "#000000";
+            let a = rgb.replace(/[^\d,]/g, '').split(',');
+            let hex = "#" + ((1 << 24) + (parseInt(a[0]) << 16) + (parseInt(a[1]) << 8) + parseInt(a[2])).toString(16).slice(1);
+            return hex;
+        }
+
+        function selectElement(el) {
+            if(el.classList.contains('locked')) return;
+            deselectAll();
+            el.classList.add('selected');
+            state.selectedElement = el;
+            if(!el.classList.contains('bg-element')) el.style.zIndex = ++state.elementCounter;
+
+            const textNode = el.querySelector('.canvas-text');
+            const toolbar = document.getElementById('text-toolbar');
+            if(textNode) {
+                toolbar.classList.remove('hidden');
+                
+                const size = parseInt(window.getComputedStyle(textNode).fontSize);
+                document.getElementById('font-size-slider').value = size;
+                document.getElementById('font-size-display').innerText = size + 'px';
+
+                const currentColor = window.getComputedStyle(textNode).color;
+                document.getElementById('font-color-picker').value = rgbToHex(currentColor);
+
+            } else {
+                toolbar.classList.add('hidden');
+            }
+        }
+
+        function changeFontSize(val) {
+            if(state.selectedElement) {
+                const textNode = state.selectedElement.querySelector('.canvas-text');
+                if(textNode) {
+                    textNode.style.fontSize = val + 'px';
+                    document.getElementById('font-size-display').innerText = val + 'px';
+                }
+            }
+        }
+
+        function changeFontColor(val) {
+            if(state.selectedElement) {
+                const textNode = state.selectedElement.querySelector('.canvas-text');
+                if(textNode) {
+                    textNode.style.color = val;
+                    textNode.style.webkitTextFillColor = val; 
+                }
+            }
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.canvas-element').forEach(el => {
+                el.classList.remove('selected');
+                const textNode = el.querySelector('.canvas-text');
+                if(textNode) textNode.blur();
+            });
+            state.selectedElement = null;
+            document.getElementById('text-toolbar').classList.add('hidden');
+        }
+
+        function getEventCoords(e) {
+            return e.type.includes('touch') ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
+        }
+
+        function startDrag(e) {
+            if (e.target.closest('.controls-layer')) return;
+            if (this.classList.contains('locked')) return;
+            
+            activeAction = 'drag';
+            activeItem = this;
+            selectElement(activeItem);
+
+            const scale = getScale();
+            const coords = getEventCoords(e);
+            
+            startX = coords.x / scale;
+            startY = coords.y / scale;
+            initialLeft = parseFloat(activeItem.style.left || 0);
+            initialTop = parseFloat(activeItem.style.top || 0);
+
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('touchmove', handleMove, {passive: false});
+            document.addEventListener('mouseup', endAction);
+            document.addEventListener('touchend', endAction);
+        }
+
+        function startResize(e) {
+            e.stopPropagation();
+            activeAction = 'resize';
+            resizeDir = this.dataset.dir;
+            activeItem = this.closest('.canvas-element');
+            selectElement(activeItem);
+
+            const scale = getScale();
+            const coords = getEventCoords(e);
+            
+            startX = coords.x / scale;
+            startY = coords.y / scale;
+            initialWidth = parseFloat(activeItem.style.width || 0);
+            initialHeight = parseFloat(activeItem.style.height || 0);
+
+            document.addEventListener('mousemove', handleMove);
+            document.addEventListener('touchmove', handleMove, {passive: false});
+            document.addEventListener('mouseup', endAction);
+            document.addEventListener('touchend', endAction);
+        }
+
+        function handleMove(e) {
+            if (!activeAction || !activeItem) return;
+            e.preventDefault(); 
+
+            const scale = getScale();
+            const coords = getEventCoords(e);
+            
+            const dx = (coords.x / scale) - startX;
+            const dy = (coords.y / scale) - startY;
+
+            if (activeAction === 'drag') {
+                activeItem.style.left = (initialLeft + dx) + 'px';
+                activeItem.style.top = (initialTop + dy) + 'px';
+            } 
+            else if (activeAction === 'resize') {
+                let newW = initialWidth;
+                let newH = initialHeight;
+
+                if (resizeDir.includes('e')) newW = initialWidth + dx;
+                if (resizeDir.includes('s')) newH = initialHeight + dy;
+
+                if(newW < 50) newW = 50;
+                if(newH < 50) newH = 50;
+
+                if (resizeDir.includes('e')) activeItem.style.width = newW + 'px';
+                if (resizeDir.includes('s')) activeItem.style.height = newH + 'px';
+            }
+        }
+
+        function endAction() {
+            if (activeAction) saveWorkspaceState(); 
+            activeAction = null;
+            activeItem = null;
+            document.removeEventListener('mousemove', handleMove);
+            document.removeEventListener('touchmove', handleMove);
+            document.removeEventListener('mouseup', endAction);
+            document.removeEventListener('touchend', endAction);
+        }
+
+        /* === EXPORTAÇÃO — Canvas 2D Nativo === */
+        async function exportImage() {
+            deselectAll();
+            const loading = document.getElementById('loading-modal');
+            loading.classList.remove('hidden');
+
+            await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+            await document.fonts.ready;
+
+            try {
+                const W = 1920, H = 1080;
+                const canvas = document.createElement('canvas');
+                canvas.width  = W;
+                canvas.height = H;
+                const ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, W, H);
+
+                const elements = Array.from(workspace.querySelectorAll('.canvas-element'))
+                    .sort((a, b) => (parseInt(a.style.zIndex) || 0) - (parseInt(b.style.zIndex) || 0));
+
+                for (const el of elements) {
+                    const x = parseFloat(el.style.left)   || 0;
+                    const y = parseFloat(el.style.top)    || 0;
+                    const w = parseFloat(el.style.width)  || 0;
+                    const h = parseFloat(el.style.height) || 0;
+
+                    const imgEl   = el.querySelector('img');
+                    const textEl  = el.querySelector('.canvas-text');
+
+                    ctx.save();
+
+                    if (imgEl && imgEl.src) {
+                        ctx.beginPath();
+                        ctx.rect(x, y, w, h);
+                        ctx.clip();
+                        
+                        await new Promise(resolve => {
+                            const drawImage = () => {
+                                try {
+                                    const isBg = el.id === 'bg-layer';
+                                    const iw = imgEl.naturalWidth  || imgEl.width;
+                                    const ih = imgEl.naturalHeight || imgEl.height;
+                                    
+                                    if(iw > 0 && ih > 0) {
+                                        if (isBg) {
+                                            const scale = Math.max(w / iw, h / ih);
+                                            const dw = iw * scale;
+                                            const dh = ih * scale;
+                                            const dx = x + (w - dw) / 2;
+                                            const dy = y + (h - dh) / 2;
+                                            ctx.drawImage(imgEl, dx, dy, dw, dh);
+                                        } else {
+                                            const scale = Math.min(w / iw, h / ih);
+                                            const dw = iw * scale;
+                                            const dh = ih * scale;
+                                            const dx = x + (w - dw) / 2;
+                                            const dy = y + (h - dh) / 2;
+                                            ctx.drawImage(imgEl, dx, dy, dw, dh);
+                                        }
+                                    }
+                                } catch(e) { console.warn('Erro ao desenhar imagem:', e); }
+                                resolve();
+                            };
+
+                            if (imgEl.complete && imgEl.naturalWidth > 0) {
+                                drawImage();
+                            } else {
+                                imgEl.onload  = drawImage;
+                                imgEl.onerror = resolve; 
+                            }
+                        });
+
+                    } else if (textEl) {
+                        const computed = window.getComputedStyle(textEl);
+                        
+                        let maxFontSize = parseFloat(textEl.style.fontSize || computed.fontSize || '60px');
+                        let actualColor = textEl.style.color || computed.color || '#000000';
+                        
+                        const childNodes = textEl.querySelectorAll('*');
+                        childNodes.forEach(node => {
+                            const childStyle = window.getComputedStyle(node);
+                            const childSize = parseFloat(childStyle.fontSize);
+                            if (childSize > maxFontSize) {
+                                maxFontSize = childSize;
+                            }
+                            if (childStyle.color && childStyle.color !== 'rgba(0, 0, 0, 0)' && childStyle.color !== 'transparent') {
+                                actualColor = childStyle.color;
+                            }
+                        });
+
+                        const parsedFontSize = maxFontSize;
+                        const fontSize   = parsedFontSize + 'px';
+                        const fontFamily = computed.fontFamily || 'sans-serif';
+                        const fontWeight = computed.fontWeight || 'bold';
+                        const color      = actualColor;
+                        const stroke     = computed.webkitTextStroke || '';
+
+                        ctx.font      = `${fontWeight} ${fontSize} ${fontFamily}`;
+                        ctx.fillStyle = color;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'top';
+
+                        if (computed.letterSpacing && computed.letterSpacing !== 'normal') {
+                            ctx.letterSpacing = computed.letterSpacing;
+                        }
+
+                        const shadow = computed.textShadow;
+                        const shadows = [];
+                        if (shadow && shadow !== 'none') {
+                            const shadowParts = shadow.split(/,(?![^\(]*\))/);
+                            shadowParts.forEach(s => {
+                                const parts = s.match(/(rgba?\([^)]+\)|#\w+|\w+)\s+([-\d.]+px)\s+([-\d.]+px)\s+([-\d.]+px)?/);
+                                if (parts) {
+                                    shadows.push({
+                                        color: parts[1],
+                                        ox: parseFloat(parts[2]),
+                                        oy: parseFloat(parts[3]),
+                                        blur: parts[4] ? parseFloat(parts[4]) : 0
+                                    });
+                                }
+                            });
+                        }
+
+                        const strokeWidth = parseFloat(stroke);
+                        if (strokeWidth > 0) {
+                            const strokeColor = stroke.replace(/^[\d.]+px\s*/, '').trim();
+                            ctx.strokeStyle = strokeColor || '#000000';
+                            ctx.lineWidth   = strokeWidth * 2;
+                            ctx.lineJoin = 'round';
+                        }
+
+                        let rawText = textEl.innerText || textEl.textContent || '';
+                        if (computed.textTransform === 'uppercase') rawText = rawText.toUpperCase();
+                        else if (computed.textTransform === 'lowercase') rawText = rawText.toLowerCase();
+
+                        const hardLines = rawText.split('\n');
+                        const lineH = parsedFontSize * 1.2;
+                        const maxWidth = w;
+                        
+                        let finalLines = [];
+                        
+                        hardLines.forEach(line => {
+                            let words = line.split(' ');
+                            let currentLine = words[0] || '';
+
+                            for (let i = 1; i < words.length; i++) {
+                                let word = words[i];
+                                let testLine = currentLine + ' ' + word;
+                                let metrics = ctx.measureText(testLine);
+                                if (metrics.width > maxWidth && i > 0) {
+                                    finalLines.push(currentLine);
+                                    currentLine = word;
+                                } else {
+                                    currentLine = testLine;
+                                }
+                            }
+                            finalLines.push(currentLine);
+                        });
+
+                        const totalH  = finalLines.length * lineH;
+                        
+                        // CORREÇÃO DEFINITIVA DO EIXO Y (Half-Leading do CSS):
+                        // O CSS distribui o espaço extra do line-height igualmente acima e abaixo da letra.
+                        // O Canvas 'top' ignora esse espaço. Temos de adicionar o "half-leading" matematicamente
+                        // para que o texto desça exatamente para o centro da sua caixa de linha.
+                        const halfLeading = (lineH - parsedFontSize) / 2;
+                        const startY  = y + (h - totalH) / 2 + halfLeading; 
+                        
+                        const centerX = x + w / 2;
+
+                        shadows.reverse().forEach(sh => {
+                            ctx.shadowColor = sh.color;
+                            ctx.shadowOffsetX = sh.ox;
+                            ctx.shadowOffsetY = sh.oy;
+                            ctx.shadowBlur = sh.blur;
+                            finalLines.forEach((line, i) => {
+                                const ly = startY + i * lineH;
+                                ctx.fillText(line, centerX, ly);
+                            });
+                        });
+
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                        ctx.shadowBlur = 0;
+
+                        if (strokeWidth > 0) {
+                            finalLines.forEach((line, i) => {
+                                const ly = startY + i * lineH;
+                                ctx.strokeText(line, centerX, ly);
+                            });
+                        }
+
+                        finalLines.forEach((line, i) => {
+                            const ly = startY + i * lineH;
+                            ctx.fillText(line, centerX, ly);
+                        });
+                    }
+
+                    ctx.restore();
+                }
+
+                canvas.toBlob(async (blob) => {
+                    try {
+                        const isTauri = window.__TAURI_INTERNALS__ || window.__TAURI__;
+
+                        if (window.showSaveFilePicker && !isTauri) {
+                            const handle = await window.showSaveFilePicker({
+                                suggestedName: 'campanha_cpii.jpg',
+                                types: [{ description: 'Imagem JPEG', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } }],
+                            });
+                            const writable = await handle.createWritable();
+                            await writable.write(blob);
+                            await writable.close();
+                        } else {
+                            const url = URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.download = 'campanha_cpii.jpg';
+                            link.href = url;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(url);
+                            if (isTauri) {
+                                setTimeout(() => customAlert('Sucesso!', 'Imagem gerada! Verifique a pasta "Downloads".'), 500);
+                            }
+                        }
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.error(err);
+                            await customAlert('Erro', 'Ocorreu um erro ao salvar o arquivo.');
+                        }
+                    }
+                    loading.classList.add('hidden');
+                }, 'image/jpeg', 0.95);
+
+            } catch (err) {
+                console.error('Falha crítica na renderização:', err);
+                loading.classList.add('hidden');
+                await customAlert('Erro de Renderização', 'Falha ao processar a imagem. Tente novamente.');
+            }
+        }
+
+    </script>
+</body>
+</html>
