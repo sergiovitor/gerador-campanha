@@ -1,12 +1,11 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Gerador de Campanha",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "identifier": "com.gerador.campanha",
   "build": {
     "beforeDevCommand": "",
     "beforeBuildCommand": "",
-    "devPath": "../src",
     "frontendDist": "../src"
   },
   "app": {
