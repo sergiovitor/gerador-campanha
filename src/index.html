@@ -1618,7 +1618,7 @@
 
                         if (window.showSaveFilePicker && !isTauri) {
                             const handle = await window.showSaveFilePicker({
-                                suggestedName: 'campanha_cpii.jpg',
+                                suggestedName: 'campanha.jpg',
                                 types: [{ description: 'Imagem JPEG', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } }],
                             });
                             const writable = await handle.createWritable();
@@ -1627,7 +1627,7 @@
                         } else {
                             const url = URL.createObjectURL(blob);
                             const link = document.createElement('a');
-                            link.download = 'campanha_cpii.jpg';
+                            link.download = 'campanha.jpg';
                             link.href = url;
                             document.body.appendChild(link);
                             link.click();
