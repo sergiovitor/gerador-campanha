@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Campanhas Escolares</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Paleta de Cores e Variáveis --- */
+        :root {
+            --primary: #3b82f6;      /* Azul principal */
+            --primary-dark: #2563eb; 
+            --secondary: #f97316;    /* Laranja (Botão) */
+            --secondary-dark: #ea580c;
+            --success: #10b981;      /* Verde */
+            --bg-light: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+        /* --- Cabeçalho --- */
+        header { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
+        nav { display: flex; justify-content: space-between; align-items: center; }
+        
+        /* [NOVO CSS] - Contêiner para alinhar ícone e texto */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Espaço entre o ícone e o texto */
+        }
+        
+        /* [NOVO CSS] - Estilo do ícone */
+        .logo-icon {
+            height: 40px; /* Ajuste a altura conforme necessário */
+            width: auto;
+        }
+
+        .logo-text { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
+        .badge { background: #dbeafe; color: var(--primary-dark); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+
+        /* --- Hero Section (Dividida em 2 colunas) --- */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+            padding: 60px 0 80px;
+        }
+
+        .hero-text {
+            flex: 1;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero-text h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .hero-text p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* [ATUALIZADO CSS] - Contêiner para a imagem real do app */
+        .hero-app {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* [NOVO CSS] - Estilo para a imagem real */
+        .app-screenshot {
+            width: 100%;
+            max-width: 450px;
+            height: auto;
+            border-radius: 12px; /* Cantos arredondados */
+            box-shadow: 0 20px 25px rgba(0,0,0,0.1); /* Sombra elegante */
+            border: 1px solid #e2e8f0; /* Borda sutil */
+        }
+
+        /* --- Botões --- */
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-orange { background: var(--secondary); color: white; font-size: 1.1rem; }
+        .btn-orange:hover { background: var(--secondary-dark); }
+        .btn-blue { background: var(--primary); color: white; }
+        .btn-blue:hover { background: var(--primary-dark); }
+
+        /* --- Seção de Funcionalidades (Grade 2x2) --- */
+        .features {
+            background-color: var(--bg-light);
+            padding: 80px 0;
+            border-radius: 40px;
+            margin-bottom: 60px;
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 50px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features-header h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 15px; }
+        .features-header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+        
+        .card:hover { border-color: var(--primary); }
+        .card-icon { font-size: 2.5rem; margin-bottom: 15px; }
+        .card h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--text-main); }
+        .card p { color: var(--text-muted); font-size: 0.95rem; }
+
+        /* --- Seção de Download --- */
+        .download { text-align: center; padding: 60px 0; }
+        .download h2 { font-size: 2rem; margin-bottom: 30px; }
+        .btn-group { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;}
+        .download small { color: var(--text-muted); }
+
+        /* --- Rodapé --- */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid #e2e8f0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsividade para Celulares */
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; text-align: center; padding: 40px 0; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo-container">
+                    <img src="logo.png" alt="Ícone do Projeto" class="logo-icon">
+                    <div class="logo-text">Gerador de Campanhas Escolares</div>
+                </div>
+                <div class="badge">Tauri v2</div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-text">
+                <h1>A voz dos alunos começa aqui</h1>
+                <p>O Gerador de Campanhas Escolares é a ferramenta leve e segura que ajuda estudantes a transformarem ideias em ações de cidadania.</p>
+                <a href="#download" class="btn btn-orange">Quero usar na minha escola</a>
+            </div>
+            
+            <div class="hero-app">
+                <img src="tela-principal.png" alt="Tela Principal do Aplicativo" class="app-screenshot">
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="features-header">
+                <h2>Por que um Gerador de Campanhas?</h2>
+                <p>Diferente de simples editores, este projeto foi desenhado para o contexto das <strong>Eleições Escolares</strong>. Ele permite que alunos organizem suas ideias e propostas sem as distrações de ferramentas profissionais.</p>
+            </div>
+
+            <div class="grid">
+                <div class="card">
+                    <div class="card-icon">🧒</div>
+                    <h3>Foco no Aluno</h3>
+                    <p>Interface adaptada para reduzir a carga cognitiva, ideal para os anos iniciais do Ensino Fundamental.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🔒</div>
+                    <h3>Privacidade Total</h3>
+                    <p>Como é um aplicativo desktop, nenhuma foto ou dado do aluno sobe para a nuvem. Tudo fica no computador da escola.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⚡</div>
+                    <h3>Leve e Rápido</h3>
+                    <p>Ocupa pouquíssimo espaço e roda perfeitamente em computadores com hardware modesto encontrados em laboratórios.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⚖️</div>
+                    <h3>Código Aberto</h3>
+                    <p>Software Livre (GPLv3) e sem mensalidades. Criado por quem conhece bem o ambiente escolar.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="download" class="download">
+            <h2>Pronto para usar na sua escola?</h2>
+            <div class="btn-group">
+                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn btn-blue">Baixar Windows (.msi)</a>
+                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn btn-blue">Baixar Linux (.deb)</a>
+            </div>
+            <small>Código-fonte disponível sob licença GPLv3.</small>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Desenvolvido com ❤️ pelo Prof. Sérgio Vitor</p>
+        </div>
+    </footer>
+
+</body>
+</html>

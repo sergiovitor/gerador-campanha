@@ -1,4 +1,4 @@
-# 🖼️ Gerador de Campanhas
+# 🖼️ Gerador de Campanhas Escolares
 
 > Ferramenta pedagógica desenvolvida para o letramento digital e o exercício da cidadania, permitindo que alunos criem materiais de campanha de forma simplificada e com alta qualidade visual.
 
@@ -13,6 +13,7 @@ Este aplicativo foi projetado para o ambiente escolar, oferecendo uma interface 
 - **🔠 Edição Tipográfica:** Biblioteca de estilos de fontes selecionados para garantir legibilidade e impacto visual.
 - **🔒 Estabilidade de Edição:** Recurso de bloqueio de elementos de fundo para evitar alterações acidentais durante o processo criativo.
 - **📥 Exportação Direta:** Geração de arquivos de imagem prontos para impressão ou divulgação em redes sociais escolares.
+- **♿ Acessibilidade:** Estrutura pensada para apoiar o uso por alunos com necessidades específicas (TEA, DI e Síndrome de Down).
 
 ## 🛠️ Tecnologias
 
