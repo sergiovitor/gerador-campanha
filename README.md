@@ -49,11 +49,11 @@ Os instaladores compilados para Windows (`.msi`) e Linux (`.deb`) estão dispon�
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**.
+Este projeto é um software livre; você pode redistribuí-lo e/ou modificá-lo sob os termos da **Licença Pública Geral GNU (GPLv3)**, conforme publicada pela Free Software Foundation.
 
-- **Atribuição:** Você deve dar o crédito apropriado ao autor.
-- **Não Comercial:** Você não pode usar este material para fins comerciais.
-- **Compartilha Igual:** Se você alterar ou transformar este material, deve distribuir suas contribuições sob a mesma licença que o original.
+Este programa é distribuído na esperança de que seja útil, mas **SEM QUALQUER GARANTIA**, educacional ou de adequação a uma finalidade específica. 
+
+O uso por escolas, educadores e estudantes é amplamente encorajado. Caso você modifique ou distribua este software, você deve obrigatoriamente manter o código-fonte aberto sob a mesma licença. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 
