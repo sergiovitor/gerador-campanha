@@ -1,32 +1,84 @@
-<style>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Campanhas Escolares | Letramento Digital</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
+    
+    <style>
         :root { --brand-color: #2563eb; }
         body { max-width: 900px; line-height: 1.6; }
         
-        /* Adicionada a cor escura no texto do Hero */
-        .hero { 
-            text-align: center; 
-            padding: 4rem 0; 
-            background: #f8fafc; 
-            color: #0f172a; 
-            border-radius: 12px; 
-            margin-bottom: 2rem; 
-        }
+        /* Caixas claras com texto forçado para grafite escuro */
+        .hero { text-align: center; padding: 4rem 0; background: #f8fafc; color: #0f172a; border-radius: 12px; margin-bottom: 2rem; }
+        .download-box { background: #eff6ff; color: #0f172a; padding: 2rem; border-radius: 12px; text-align: center; margin: 3rem 0; }
         
         .badge { background: var(--brand-color); color: white; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
         @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
         .card { border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 8px; }
-        
-        /* Adicionada a cor escura no texto da caixa de Download */
-        .download-box { 
-            background: #eff6ff; 
-            color: #0f172a; 
-            padding: 2rem; 
-            border-radius: 12px; 
-            text-align: center; 
-            margin: 3rem 0; 
-        }
-        
         .btn { background: var(--brand-color); color: white; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: bold; }
         footer { text-align: center; margin-top: 4rem; font-size: 0.9rem; color: #64748b; }
     </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <strong>Gerador de Campanhas</strong>
+            <span class="badge">Tauri v2</span>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Transforme o letramento digital em exercício de cidadania</h1>
+        <p>Uma ferramenta simples e poderosa para estudantes criarem materiais de campanha de forma autônoma e inclusiva.</p>
+        <br>
+        <a href="#download" class="btn">Baixar Agora</a>
+    </section>
+
+    <main>
+        <section>
+            <h2>Por que um Gerador de Campanhas?</h2>
+            <p>Diferente de um simples editor de cartazes, este projeto foi desenhado para o contexto das <strong>Eleições Escolares</strong>. Ele permite que alunos de 7 a 11 anos organizem suas ideias, propostas e identidade visual sem as distrações e complexidades de ferramentas de design profissionais.</p>
+        </section>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🧒 Foco no Aluno</h3>
+                <p>Interface adaptada para reduzir a carga cognitiva, ideal para anos iniciais do Fundamental e alunos com TEA ou DI.</p>
+            </div>
+            <div class="card">
+                <h3>🔒 Privacidade Total</h3>
+                <p>Como é um aplicativo desktop (Tauri), nenhum dado ou foto do aluno sobe para a nuvem. Tudo fica no computador da escola.</p>
+            </div>
+            <div class="card">
+                <h3>⚡ Leve e Rápido</h3>
+                <p>Ocupa pouquíssimo espaço e roda perfeitamente em computadores com hardware modesto encontrados em laboratórios de informática.</p>
+            </div>
+            <div class="card">
+                <h3>⚖️ Código Aberto</h3>
+                <p>Licenciado sob GPLv3. Criado por quem entende o chão da escola e as necessidades da informática educativa.</p>
+            </div>
+        </div>
+
+        <section id="download" class="download-box">
+            <h2>Pronto para usar na sua escola?</h2>
+            <p>Baixe a versão mais recente para o seu sistema operacional:</p>
+            <p>
+                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn">Versão Windows (.msi)</a>
+                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn">Versão Linux (.deb)</a>
+            </p>
+            <small>Código-fonte disponível sob licença GPLv3.</small>
+        </section>
+    </main>
+
+    <footer>
+        <p>Desenvolvido com ❤️ pelo Prof. Sérgio Vitor</p>
+        <p>Campus Realengo I | Licença CC BY-NC-SA 4.0 (Ativos)</p>
+    </footer>
+
+</body>
+</html>
