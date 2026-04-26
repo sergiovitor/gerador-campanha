@@ -3,8 +3,6 @@ name: "Compilar Aplicativo (Windows e Linux)"
 on:
   workflow_dispatch: # Permite que você rode a compilação manualmente clicando em um botão
   push:
-    branches:
-      - main
     tags:
       - 'v*'
 jobs:
