@@ -36,7 +36,21 @@
         /* --- Cabeçalho --- */
         header { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
         nav { display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
+        
+        /* [NOVO CSS] - Contêiner para alinhar ícone e texto */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Espaço entre o ícone e o texto */
+        }
+        
+        /* [NOVO CSS] - Estilo do ícone */
+        .logo-icon {
+            height: 40px; /* Ajuste a altura conforme necessário */
+            width: auto;
+        }
+
+        .logo-text { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
         .badge { background: #dbeafe; color: var(--primary-dark); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
 
         /* --- Hero Section (Dividida em 2 colunas) --- */
@@ -50,7 +64,7 @@
 
         .hero-text {
             flex: 1;
-            text-align: center; /* Texto centralizado no seu próprio bloco */
+            text-align: center;
             padding: 0 20px;
         }
 
@@ -71,7 +85,7 @@
             margin-right: auto;
         }
 
-        /* Representação do Aplicativo (Mockup SVG) */
+        /* [ATUALIZADO CSS] - Contêiner para a imagem real do app */
         .hero-app {
             flex: 1;
             display: flex;
@@ -79,10 +93,14 @@
             position: relative;
         }
 
-        .hero-app svg {
+        /* [NOVO CSS] - Estilo para a imagem real */
+        .app-screenshot {
             width: 100%;
             max-width: 450px;
-            filter: drop-shadow(0 20px 25px rgba(0,0,0,0.1));
+            height: auto;
+            border-radius: 12px; /* Cantos arredondados */
+            box-shadow: 0 20px 25px rgba(0,0,0,0.1); /* Sombra elegante */
+            border: 1px solid #e2e8f0; /* Borda sutil */
         }
 
         /* --- Botões --- */
@@ -121,7 +139,7 @@
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Grade 2x2 forçada */
+            grid-template-columns: repeat(2, 1fr);
             gap: 30px;
             max-width: 900px;
             margin: 0 auto;
@@ -160,7 +178,7 @@
         /* Responsividade para Celulares */
         @media (max-width: 768px) {
             .hero { flex-direction: column; text-align: center; padding: 40px 0; }
-            .grid { grid-template-columns: 1fr; } /* Fica em 1 coluna no celular */
+            .grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -169,7 +187,10 @@
     <header>
         <div class="container">
             <nav>
-                <div class="logo">Gerador de Campanhas Escolares</div>
+                <div class="logo-container">
+                    <img src="logo.png" alt="Ícone do Projeto" class="logo-icon">
+                    <div class="logo-text">Gerador de Campanhas Escolares</div>
+                </div>
                 <div class="badge">Tauri v2</div>
             </nav>
         </div>
@@ -184,35 +205,7 @@
             </div>
             
             <div class="hero-app">
-                <svg viewBox="0 0 500 450" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="400" cy="80" r="60" fill="#f97316" opacity="0.8"/>
-                    <rect x="20" y="300" width="100" height="100" rx="20" fill="#10b981" opacity="0.8"/>
-                    <circle cx="250" cy="225" r="200" fill="#dbeafe" opacity="0.5"/>
-                    
-                    <rect x="80" y="60" width="340" height="320" rx="15" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
-                    
-                    <path d="M 80 75 Q 80 60 95 60 L 405 60 Q 420 60 420 75 L 420 110 L 80 110 Z" fill="#3b82f6"/>
-                    <circle cx="100" cy="85" r="6" fill="#ef4444"/>
-                    <circle cx="120" cy="85" r="6" fill="#fbbf24"/>
-                    <circle cx="140" cy="85" r="6" fill="#10b981"/>
-                    <rect x="180" y="77" width="140" height="16" rx="8" fill="#ffffff" opacity="0.3"/>
-                    
-                    <rect x="110" y="140" width="80" height="80" rx="10" fill="#e2e8f0"/>
-                    <circle cx="150" cy="170" r="15" fill="#cbd5e1"/>
-                    <path d="M 125 210 Q 150 180 175 210" stroke="#cbd5e1" stroke-width="20" stroke-linecap="round"/>
-                    
-                    <rect x="210" y="140" width="180" height="12" rx="6" fill="#94a3b8"/>
-                    <rect x="210" y="165" width="140" height="12" rx="6" fill="#cbd5e1"/>
-                    <rect x="210" y="190" width="160" height="12" rx="6" fill="#cbd5e1"/>
-                    
-                    <rect x="110" y="250" width="280" height="40" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1"/>
-                    <text x="125" y="275" font-family="Inter, sans-serif" font-size="14" fill="#94a3b8" font-weight="600">Sua Mensagem Aqui...</text>
-                    
-                    <circle cx="130" cy="320" r="15" fill="#dbeafe"/>
-                    <circle cx="170" cy="320" r="15" fill="#ffedd5"/>
-                    <circle cx="210" cy="320" r="15" fill="#dcfce3"/>
-                    <rect x="290" y="305" width="100" height="30" rx="15" fill="#3b82f6"/>
-                </svg>
+                <img src="tela-principal.png" alt="Tela Principal do Aplicativo" class="app-screenshot">
             </div>
         </section>
 
