@@ -3,81 +3,207 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Campanhas Escolares | Letramento Digital</title>
+    <title>Gerador de Campanhas Escolares ✨ | Autonomia & Cidadania</title>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        :root { --brand-color: #2563eb; }
-        body { max-width: 900px; line-height: 1.6; }
+        /* --- Configurações Gerais e Cores --- */
+        :root {
+            --brand-primary: #3b82f6;   /* Azul vibrante */
+            --brand-secondary: #f97316; /* Laranja energético */
+            --brand-success: #22c55e;   /* Verde progresso */
+            --bg-body: #ffffff;         /* Fundo limpo */
+            --bg-card: #f8fafc;         /* Fundo leve dos cards */
+            --text-dark: #0f172a;       /* Grafite para contraste */
+            --text-light: #64748b;      /* Cinza médio */
+            --white: #ffffff;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
         
-        /* Caixas claras com texto forçado para grafite escuro */
-        .hero { text-align: center; padding: 4rem 0; background: #f8fafc; color: #0f172a; border-radius: 12px; margin-bottom: 2rem; }
-        .download-box { background: #eff6ff; color: #0f172a; padding: 2rem; border-radius: 12px; text-align: center; margin: 3rem 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        .badge { background: var(--brand-color); color: white; padding: 0.2rem 0.8rem; border-radius: 20px; font-size: 0.8rem; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem; }
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-        .card { border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 8px; }
-        .btn { background: var(--brand-color); color: white; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: 6px; font-weight: bold; }
-        footer { text-align: center; margin-top: 4rem; font-size: 0.9rem; color: #64748b; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* --- Layout --- */
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; }
+        
+        /* --- Cabeçalho --- */
+        header { padding: 1.5rem 0; border-bottom: 1px solid #e2e8f0; }
+        nav { display: flex; justify-content: space-between; align-items: center; }
+        .logo-text { font-weight: 700; font-size: 1.25rem; }
+        .badge-tauri { background: #dbeafe; color: var(--brand-primary); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+
+        /* --- Hero Section (Alegre e com Imagem) --- */
+        .hero { 
+            display: flex; 
+            align-items: center; 
+            gap: 2rem; 
+            padding: 5rem 0; 
+            background: linear-gradient(135deg, #eff6ff 0%, #f9fafb 100%); 
+            border-radius: 20px; 
+            margin: 2rem 0 3rem; 
+            box-shadow: var(--shadow-md);
+        }
+        .hero-content { flex: 1; text-align: left; }
+        .hero-image { flex: 1; text-align: center; }
+        .hero-image svg { width: 100%; max-width: 400px; height: auto; }
+        
+        .hero h1 { font-weight: 700; font-size: 2.5rem; line-height: 1.2; margin-bottom: 1rem; color: var(--text-dark); }
+        .hero h1 span { color: var(--brand-primary); }
+        .hero p { font-size: 1.1rem; color: var(--text-light); margin-bottom: 2rem; }
+
+        /* --- Botões --- */
+        .btn { display: inline-block; padding: 0.8rem 1.8rem; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 1rem; transition: background-color 0.2s; }
+        .btn-primary { background: var(--brand-primary); color: var(--white); }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-secondary { background: var(--brand-secondary); color: var(--white); }
+        .btn-secondary:hover { background: #ea580c; }
+        
+        /* --- Main Content e Grid --- */
+        main section { margin-bottom: 3rem; }
+        h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2.5rem; }
+        .card { 
+            background: var(--bg-card); 
+            border: 1px solid #e2e8f0; 
+            padding: 2rem; 
+            border-radius: 12px; 
+            text-align: center; 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+        
+        /* Estilização dos ícones SVG nos cards */
+        .card-icon { width: 64px; height: 64px; margin: 0 auto 1.5rem; }
+        .card-icon svg { width: 100%; height: 100%; fill: var(--brand-primary); }
+        
+        .card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-dark); }
+        .card p { font-size: 0.95rem; color: var(--text-light); }
+
+        /* --- Download Box (Energético e Moderno) --- */
+        .download-box { 
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%); 
+            color: var(--white); 
+            padding: 4rem; 
+            border-radius: 20px; 
+            text-align: center; 
+            margin: 4rem 0; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+        }
+        .download-box h2 { color: var(--white); font-size: 2.2rem; }
+        .download-box p { color: #e2e8f0; font-size: 1.1rem; margin-bottom: 2.5rem; }
+        .btn-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .download-box small { display: block; margin-top: 1.5rem; color: #94a3b8; font-size: 0.85rem; }
+
+        /* --- Rodapé --- */
+        footer { text-align: center; padding: 2rem 0; border-top: 1px solid #e2e8f0; font-size: 0.9rem; color: var(--text-light); }
+        footer strong { color: var(--brand-success); }
+
+        /* --- Responsividade --- */
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; text-align: center; padding: 3rem; gap: 1rem; }
+            .hero-content { text-align: center; }
+            .hero h1 { font-size: 2rem; }
+            .download-box { padding: 2rem; }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <nav>
-            <strong>Gerador de Campanhas</strong>
-            <span class="badge">Tauri v2</span>
-        </nav>
+        <div class="container">
+            <nav>
+                <span class="logo-text">Gerador de Campanhas ✨</span>
+                <span class="badge-tauri">Plataforma Tauri v2</span>
+            </nav>
+        </div>
     </header>
 
-    <section class="hero">
-        <h1>Transforme o letramento digital em exercício de cidadania</h1>
-        <p>Uma ferramenta simples e poderosa para estudantes criarem materiais de campanha de forma autônoma e inclusiva.</p>
-        <br>
-        <a href="#download" class="btn">Baixar Agora</a>
-    </section>
-
-    <main>
-        <section>
-            <h2>Por que um Gerador de Campanhas?</h2>
-            <p>Diferente de um simples editor de cartazes, este projeto foi desenhado para o contexto das <strong>Eleições Escolares</strong>. Ele permite que alunos de 7 a 11 anos organizem suas ideias, propostas e identidade visual sem as distrações e complexidades de ferramentas de design profissionais.</p>
+    <div class="container">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>A <span>voz dos alunos</span> começa aqui</h1>
+                <p>O <strong>Gerador de Campanhas Escolares</strong> é a ferramenta leve, segura e inclusiva que ajuda estudantes a transformarem ideias em ações de cidadania.</p>
+                <a href="#download" class="btn btn-secondary">Quero minha escola participando</a>
+            </div>
+            <div class="hero-image">
+                <svg viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="250" cy="200" r="150" fill="#dbeafe" opacity="0.6"/>
+                    <rect x="180" y="100" width="140" height="200" rx="20" fill="#3b82f6"/>
+                    <path d="M 180 180 L 320 180" stroke="#f8fafc" stroke-width="5"/>
+                    <rect x="210" y="140" width="80" height="20" rx="5" fill="#f8fafc"/>
+                    <circle cx="380" cy="120" r="40" fill="#f97316"/>
+                    <rect x="100" y="280" width="80" height="80" rx="10" fill="#22c55e"/>
+                </svg>
+            </div>
         </section>
 
-        <div class="grid">
-            <div class="card">
-                <h3>🧒 Foco no Aluno</h3>
-                <p>Interface adaptada para reduzir a carga cognitiva, ideal para anos iniciais do Fundamental e alunos com TEA ou DI.</p>
-            </div>
-            <div class="card">
-                <h3>🔒 Privacidade Total</h3>
-                <p>Como é um aplicativo desktop (Tauri), nenhum dado ou foto do aluno sobe para a nuvem. Tudo fica no computador da escola.</p>
-            </div>
-            <div class="card">
-                <h3>⚡ Leve e Rápido</h3>
-                <p>Ocupa pouquíssimo espaço e roda perfeitamente em computadores com hardware modesto encontrados em laboratórios de informática.</p>
-            </div>
-            <div class="card">
-                <h3>⚖️ Código Aberto</h3>
-                <p>Licenciado sob GPLv3. Criado por quem entende o chão da escola e as necessidades da informática educativa.</p>
-            </div>
-        </div>
+        <main>
+            <section>
+                <h2>Por que levar para o Laboratório de Informática?</h2>
+                <p style="text-align: center; max-width: 700px; margin: 0 auto 2.5rem; color: var(--text-light);">Ao contrário de simples editores de cartazes, o <strong>Gerador de Campanhas</strong> foi construído focado no ambiente escolar e nas necessidades do <strong>letramento digital</strong> e da <strong>cidadania ativa</strong>.</p>
 
-        <section id="download" class="download-box">
-            <h2>Pronto para usar na sua escola?</h2>
-            <p>Baixe a versão mais recente para o seu sistema operacional:</p>
-            <p>
-                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn">Versão Windows (.msi)</a>
-                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn">Versão Linux (.deb)</a>
-            </p>
-            <small>Código-fonte disponível sob licença GPLv3.</small>
-        </section>
-    </main>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C10.3 2 9 3.3 9 5s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3Zm0 13c-3.3 0-6-2.7-6-6h2c0 2.2 1.8 4 4 4s4-1.8 4-4h2c0 3.3-2.7 6-6 6ZM4.8 21.8c-.5.3-1 .2-1.3-.3-.3-.5-.2-1 .3-1.3l2-1.4c1-.7 2.2-1.1 3.5-1.1s2.5.4 3.5 1.1l2 1.4c.5.3.6 1 .3 1.3-.3.5-.8.6-1.3.3l-1.5-1c-1-.7-2.2-1.1-3.5-1.1s-2.5.4-3.5 1.1l-1.5 1Z"/></svg>
+                        </div>
+                        <h3>🧒 Foco no Aluno e Acessibilidade</h3>
+                        <p>Interface intuitiva projetada para reduzir a carga cognitiva, ideal para anos iniciais do Fundamental e alunos com TEA ou DI.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C9.2 2 7 4.2 7 7v3H6c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-8c0-1.1-.9-2-2-2h-1V7c0-2.8-2.2-5-5-5Zm0 2c1.7 0 3 1.3 3 3v3H9V7c0-1.7 1.3-3 3-3Z"/></svg>
+                        </div>
+                        <h3>🔒 Privacidade Total e Segura</h3>
+                        <p>Como é um aplicativo desktop, nenhuma foto ou dado do aluno sobe para a nuvem. Tudo fica protegido no computador da escola.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 10V3L5.6 13H11v7L18.4 10H13Z"/></svg>
+                        </div>
+                        <h3>⚡ Leve, Ágil e Responsável</h3>
+                        <p>Ocupa pouquíssimo espaço e roda em computadores modesto do laboratório de informática.</p>
+                    </div>
+                    <div class="card" style="border-color: var(--brand-primary);">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8Z"/><path d="M13 11V7l-4 5 4 5V13h5V11z" fill-rule="evenodd" clip-rule="evenodd"/></svg>
+                        </div>
+                        <h3>⚖️ Código Aberto e Sustentável</h3>
+                        <p>Software Livre (GPLv3) e sem mensalidades. Criado por Coordenador Pedagógico especializado em Informática Educativa.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="download" class="download-box">
+                <h2>Cidadania começa hoje!</h2>
+                <p>Baixe a versão mais recente e inicie a próxima campanha eleitoral da sua escola agora mesmo.</p>
+                
+                <div class="btn-group">
+                    <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn btn-primary">Instalador Windows (.msi)</a>
+                    <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn btn-primary">Pacote Linux (.deb)</a>
+                </div>
+                
+                <small>O Gerador de Campanhas é um software livre sob licença GPLv3.</small>
+            </section>
+        </main>
+    </div>
 
     <footer>
-        <p>Desenvolvido com ❤️ pelo Prof. Sérgio Vitor</p>
-        <p>Campus Realengo I | Licença CC BY-NC-SA 4.0 (Ativos)</p>
+        <div class="container">
+            <p>Desenvolvido com ❤️ pelo Prof. Sérgio Vitor</p>
+            <p>Campus Realengo I | Licença CC BY-NC-SA 4.0 (Ativos) | <strong>Ferramenta Gratuita</strong></p>
+        </div>
     </footer>
 
 </body>
