@@ -1,0 +1,23 @@
+/* === FONTES LOCAIS - GERADOR DE CAMPANHAS === */
+
+@font-face { font-family: 'Bangers'; src: url('fonts/bangers.ttf') format('truetype'); }
+@font-face { font-family: 'Carter One'; src: url('fonts/carterone.ttf') format('truetype'); }
+@font-face { font-family: 'Cinzel'; src: url('fonts/cinzel.ttf') format('truetype'); }
+@font-face { font-family: 'Creepster'; src: url('fonts/creepster.ttf') format('truetype'); }
+@font-face { 
+    font-family: 'Fredoka One'; /* Mantemos o nome que o aplicativo conhece */
+    src: url('fonts/fredoka.ttf') format('truetype'); /* Apontamos para o arquivo novo */
+}
+@font-face { font-family: 'Montserrat'; src: url('fonts/montserrat.ttf') format('truetype'); }
+@font-face { font-family: 'Pacifico'; src: url('fonts/pacifico.ttf') format('truetype'); }
+@font-face { font-family: 'Permanent Marker'; src: url('fonts/permanentmarker.ttf') format('truetype'); }
+@font-face { font-family: 'Press Start 2P'; src: url('fonts/pressstart2p.ttf') format('truetype'); }
+@font-face { font-family: 'Righteous'; src: url('fonts/righteous.ttf') format('truetype'); }
+@font-face { font-family: 'Russo One'; src: url('fonts/russoone.ttf') format('truetype'); }
+@font-face { font-family: 'Monoton'; src: url('fonts/monoton.ttf') format('truetype'); }
+@font-face { font-family: 'Lobster'; src: url('fonts/lobster.ttf') format('truetype'); }
+@font-face { font-family: 'Black Ops One'; src: url('fonts/blackopsone.ttf') format('truetype'); }
+@font-face { font-family: 'Fascinate Inline'; src: url('fonts/fascinateinline.ttf') format('truetype'); }
+@font-face { font-family: 'Knewave'; src: url('fonts/knewave.ttf') format('truetype'); }
+@font-face { font-family: 'Luckiest Guy'; src: url('fonts/luckiestguy.ttf') format('truetype'); }
+@font-face { font-family: 'Shrikhand'; src: url('fonts/shrikhand.ttf') format('truetype'); }
