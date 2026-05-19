@@ -559,9 +559,6 @@
         async function saveAssetToDB(type, file) {
             const db = await initDB();
             const id = type + '_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
-            // Salva como Blob puro com mimeType explícito em campo separado.
-            // O objeto File pode ser reconstruído sem .type após fechamento abrupto
-            // do browser, fazendo o createObjectURL falhar silenciosamente.
             const mimeType = file.type || 'image/jpeg';
             const blob = new Blob([await file.arrayBuffer()], { type: mimeType });
             return new Promise((resolve, reject) => {
@@ -615,24 +612,8 @@
             location.reload();
         }
 
-        /* === SALVAR / ABRIR PROJETO (.campanha) ===
-         *
-         * Formato do arquivo:
-         *   JSON com dois campos:
-         *     - workspace : o mesmo objeto que já vai para o localStorage
-         *     - assets    : { [id]: { type, mimeType, b64: string } }
-         *
-         * Performance:
-         *   - Imagens são lidas como ArrayBuffer e convertidas para base64
-         *     via Uint8Array → string em chunks (evita stack overflow em imagens grandes).
-         *   - Na abertura, base64 → Blob → Object URL diretamente na memória,
-         *     sem tocar no IndexedDB (mais rápido). O IndexedDB só é escrito se
-         *     o usuário fizer upload manualmente; os assets do projeto ficam apenas
-         *     no state.fileMap enquanto a sessão durar.
-         *   - A leitura de cada blob do DB usa getAll() em uma única transação.
-         */
+        /* === SALVAR / ABRIR PROJETO (.campanha) === */
 
-        // Converte ArrayBuffer para string base64 em chunks seguros (sem stack overflow)
         function arrayBufferToBase64(buffer) {
             const bytes = new Uint8Array(buffer);
             const chunkSize = 8192;
@@ -643,7 +624,6 @@
             return btoa(binary);
         }
 
-        // Converte base64 de volta para Blob
         function base64ToBlob(b64, mimeType) {
             const binary = atob(b64);
             const bytes = new Uint8Array(binary.length);
@@ -658,10 +638,8 @@
             loading.classList.remove('hidden');
 
             try {
-                // 1. Coleta o estado atual do workspace
                 const workspaceData = JSON.parse(localStorage.getItem('campanha_workspace') || '{"elements":[],"bgLocked":false}');
 
-                // 2. Coleta todos os assets do IndexedDB em UMA transação
                 const db = await initDB();
                 const allAssets = await new Promise((resolve, reject) => {
                     const tx = db.transaction('assets', 'readonly');
@@ -670,15 +648,12 @@
                     req.onerror = () => reject(req.error);
                 });
 
-                // 3. Descobre quais IDs de assets estão realmente em uso no workspace
-                //    (ignora imagens que foram deletadas da tela)
                 const usedPaths = new Set(
                     workspaceData.elements
                         .filter(el => !el.isText && el.path && !el.path.startsWith('http'))
                         .map(el => el.path)
                 );
 
-                // 4. Converte apenas os assets em uso para base64 (paralelismo com Promise.all)
                 loadingText.textContent = 'Compactando imagens...';
                 const assetsMap = {};
                 await Promise.all(
@@ -694,14 +669,29 @@
                         })
                 );
 
-                // 5. Monta o arquivo final e dispara o download
                 loadingText.textContent = 'Salvando arquivo...';
                 const projectData = { version: 1, workspace: workspaceData, assets: assetsMap };
                 const blob = new Blob([JSON.stringify(projectData)], { type: 'application/json' });
 
-                // Tenta File System Access API (Tauri / Chrome moderno) → fallback para download
+                // Tenta File System Access API (Tauri) → File System (Web) → Fallback
                 try {
-                    if (window.showSaveFilePicker) {
+                    if (window.__TAURI__) {
+                        const dialog = window.__TAURI__.dialog || window.__TAURI_PLUGIN_DIALOG__;
+                        const fs = window.__TAURI__.fs || window.__TAURI_PLUGIN_FS__;
+                        
+                        const filePath = await dialog.save({
+                            defaultPath: 'meu-projeto.campanha',
+                            title: 'Salvar Projeto',
+                            filters: [{ name: 'Projeto Campanha', extensions: ['campanha'] }]
+                        });
+                        
+                        if (filePath) {
+                            // Salva usando a API do sistema de arquivos nativo do Tauri
+                            await fs.writeTextFile(filePath, JSON.stringify(projectData));
+                        } else {
+                            return; // Usuário cancelou a janela
+                        }
+                    } else if (window.showSaveFilePicker) {
                         const handle = await window.showSaveFilePicker({
                             suggestedName: 'meu-projeto.campanha',
                             types: [{ description: 'Projeto Campanha CPII', accept: { 'application/json': ['.campanha'] } }]
@@ -745,7 +735,6 @@
             loading.classList.remove('hidden');
 
             try {
-                // 1. Lê e parseia o arquivo
                 const text = await file.text();
                 const projectData = JSON.parse(text);
 
@@ -753,7 +742,6 @@
                     throw new Error('Arquivo inválido ou corrompido.');
                 }
 
-                // 2. Limpa o IndexedDB atual e reseta o estado
                 loadingText.textContent = 'Restaurando imagens...';
 
                 if (_dbInstance) { _dbInstance.close(); _dbInstance = null; }
@@ -767,8 +755,6 @@
                 state.fundos = [];
                 state.imagens = [];
 
-                // 3. Converte base64 → Blob e salva no IndexedDB (igual a um upload normal)
-                //    Isso garante que fechar o browser após abrir um projeto não perde as imagens.
                 const db = await initDB();
                 await Promise.all(Object.entries(projectData.assets).map(async ([id, asset]) => {
                     const blob = base64ToBlob(asset.b64, asset.mimeType);
@@ -776,7 +762,6 @@
                     state.fileMap[id] = url;
                     if (state[asset.type]) state[asset.type].push({ path: id, url });
 
-                    // Persiste no IndexedDB com o mesmo ID original do projeto
                     return new Promise((resolve, reject) => {
                         const tx = db.transaction('assets', 'readwrite');
                         tx.objectStore('assets').put({ id, type: asset.type, mimeType: asset.mimeType, file: blob });
@@ -785,7 +770,6 @@
                     });
                 }));
 
-                // 4. Carrega o workspace
                 loadingText.textContent = 'Restaurando canvas...';
                 localStorage.setItem('campanha_workspace', JSON.stringify(projectData.workspace));
                 workspace.innerHTML = '';
@@ -806,7 +790,7 @@
             }
         }
 
-        /* === UPLOADS === */
+        /* === UPLOADS E PIXABAY === */
         async function handleUpload(e, type) {
             const files = e.target.files;
             if(!files || files.length === 0) return;
@@ -826,7 +810,6 @@
             document.body.style.cursor = 'default';
         }
 
-        /* === PIXABAY API === */
         async function searchPixabay(type) {
             if(!PIXABAY_API_KEY) {
                 await customAlert("Atenção", "Por favor, configure a chave API nas Configurações.");
@@ -889,7 +872,7 @@
 
         /* === SALVAMENTO AUTOMÁTICO NA MEMÓRIA DO NAVEGADOR === */
         function saveWorkspaceState() {
-            if (state._restoring) return; // não salva durante restauração de projeto
+            if (state._restoring) return;
             const elements = [];
             document.querySelectorAll('.canvas-element').forEach(el => {
                 const isBg = el.id === 'bg-layer';
@@ -937,8 +920,6 @@
                         const isWeb = item.path && item.path.startsWith('http');
                         let url = isWeb ? item.path : state.fileMap[item.path];
 
-                        // Fallback: se a URL não está no fileMap (raro mas possível),
-                        // busca o asset diretamente do IndexedDB
                         if (!url && !isWeb && item.path) {
                             try {
                                 const db = await initDB();
@@ -981,7 +962,6 @@
             }
         }
 
-        // Salvar apenas após interações que modificam o canvas, não em todo mouseup do documento
         workspace.addEventListener('input', saveWorkspaceState);
 
         /* === INTERFACE E RESPONSIVIDADE === */
@@ -1052,7 +1032,6 @@
             const paddingX = 48;
             const paddingY = 48;
             
-            // Impede que o quadro recolha para tamanho 0 ou inferior quando os painéis mudam 
             const cw = Math.max(1, container.clientWidth - paddingX);
             const ch = Math.max(1, container.clientHeight - paddingY);
             
@@ -1062,7 +1041,6 @@
             wrapper.style.width = `${1920 * scale}px`;
             wrapper.style.height = `${1080 * scale}px`;
 
-            // Revela a área de trabalho suavemente apenas após a escala ter sido matematicamente fixada, prevenindo o FOUC
             wrapper.classList.remove('opacity-0');
         }
 
@@ -1231,7 +1209,6 @@
                 if(state.selectedElement === wrapper) e.stopPropagation();
             }, {passive: false});
 
-            // FILTRO DE TEXTO PURO: Intercepta a colagem para evitar que estilos invisíveis entrem e causem o bug de tamanho no export
             textDiv.addEventListener('paste', (e) => {
                 e.preventDefault();
                 const text = (e.originalEvent || e).clipboardData.getData('text/plain');
@@ -1571,10 +1548,6 @@
 
                         const totalH  = finalLines.length * lineH;
                         
-                        // CORREÇÃO DEFINITIVA DO EIXO Y (Half-Leading do CSS):
-                        // O CSS distribui o espaço extra do line-height igualmente acima e abaixo da letra.
-                        // O Canvas 'top' ignora esse espaço. Temos de adicionar o "half-leading" matematicamente
-                        // para que o texto desça exatamente para o centro da sua caixa de linha.
                         const halfLeading = (lineH - parsedFontSize) / 2;
                         const startY  = y + (h - totalH) / 2 + halfLeading; 
                         
@@ -1614,9 +1587,24 @@
 
                 canvas.toBlob(async (blob) => {
                     try {
-                        const isTauri = window.__TAURI_INTERNALS__ || window.__TAURI__;
-
-                        if (window.showSaveFilePicker && !isTauri) {
+                        if (window.__TAURI__) {
+                            const dialog = window.__TAURI__.dialog || window.__TAURI_PLUGIN_DIALOG__;
+                            const fs = window.__TAURI__.fs || window.__TAURI_PLUGIN_FS__;
+                            
+                            const filePath = await dialog.save({
+                                defaultPath: 'campanha.jpg',
+                                title: 'Salvar Imagem Full HD',
+                                filters: [{ name: 'Imagem JPEG', extensions: ['jpg', 'jpeg'] }]
+                            });
+                            
+                            if (filePath) {
+                                // Para imagens (binário), converte o blob para Uint8Array antes de salvar
+                                const arrayBuffer = await blob.arrayBuffer();
+                                const uint8Array = new Uint8Array(arrayBuffer);
+                                await fs.writeFile(filePath, uint8Array);
+                                setTimeout(() => customAlert('Sucesso!', 'Imagem salva com sucesso em:\n' + filePath), 500);
+                            }
+                        } else if (window.showSaveFilePicker) {
                             const handle = await window.showSaveFilePicker({
                                 suggestedName: 'campanha.jpg',
                                 types: [{ description: 'Imagem JPEG', accept: { 'image/jpeg': ['.jpg', '.jpeg'] } }],
@@ -1633,9 +1621,6 @@
                             link.click();
                             document.body.removeChild(link);
                             URL.revokeObjectURL(url);
-                            if (isTauri) {
-                                setTimeout(() => customAlert('Sucesso!', 'Imagem gerada! Verifique a pasta "Downloads".'), 500);
-                            }
                         }
                     } catch (err) {
                         if (err.name !== 'AbortError') {
