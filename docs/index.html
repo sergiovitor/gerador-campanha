@@ -3,257 +3,839 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gerador de Campanhas Escolares - A ferramenta que ajuda estudantes a transformarem ideias em ações de cidadania">
     <title>Gerador de Campanhas Escolares</title>
-    
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        accent: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        /* --- Paleta de Cores e Variáveis --- */
-        :root {
-            --primary: #3b82f6;      /* Azul principal */
-            --primary-dark: #2563eb; 
-            --secondary: #f97316;    /* Laranja (Botão) */
-            --secondary-dark: #ea580c;
-            --success: #10b981;      /* Verde */
-            --bg-light: #f8fafc;
-            --text-main: #0f172a;
-            --text-muted: #475569;
+        html {
+            scroll-behavior: smooth;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
-            color: var(--text-main);
-            line-height: 1.6;
+        .gradient-hero {
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
         }
-
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-
-        /* --- Cabeçalho --- */
-        header { padding: 20px 0; border-bottom: 1px solid #e2e8f0; }
-        nav { display: flex; justify-content: space-between; align-items: center; }
-        
-        /* [NOVO CSS] - Contêiner para alinhar ícone e texto */
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px; /* Espaço entre o ícone e o texto */
+        .gradient-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,1) 100%);
         }
-        
-        /* [NOVO CSS] - Estilo do ícone */
-        .logo-icon {
-            height: 40px; /* Ajuste a altura conforme necessário */
-            width: auto;
+        .feature-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        .logo-text { font-weight: 800; font-size: 1.2rem; color: var(--text-main); }
-        .badge { background: #dbeafe; color: var(--primary-dark); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
-
-        /* --- Hero Section (Dividida em 2 colunas) --- */
-        .hero {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 40px;
-            padding: 60px 0 80px;
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-
-        .hero-text {
-            flex: 1;
-            text-align: center;
-            padding: 0 20px;
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transition: all 0.3s ease;
         }
-
-        .hero-text h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 20px;
-            color: var(--primary);
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
         }
-
-        .hero-text p {
-            font-size: 1.15rem;
-            color: var(--text-muted);
-            margin-bottom: 30px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
+        .btn-secondary {
+            transition: all 0.3s ease;
         }
-
-        /* [ATUALIZADO CSS] - Contêiner para a imagem real do app */
-        .hero-app {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            position: relative;
+        .btn-secondary:hover {
+            background: #1e40af;
+            color: white;
+            transform: translateY(-2px);
         }
-
-        /* [NOVO CSS] - Estilo para a imagem real */
-        .app-screenshot {
-            width: 100%;
-            max-width: 450px;
-            height: auto;
-            border-radius: 12px; /* Cantos arredondados */
-            box-shadow: 0 20px 25px rgba(0,0,0,0.1); /* Sombra elegante */
-            border: 1px solid #e2e8f0; /* Borda sutil */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
         }
-
-        /* --- Botões --- */
-        .btn {
-            display: inline-block;
-            padding: 14px 28px;
-            border-radius: 8px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: transform 0.2s, background 0.2s;
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
-        .btn:hover { transform: translateY(-2px); }
-        .btn-orange { background: var(--secondary); color: white; font-size: 1.1rem; }
-        .btn-orange:hover { background: var(--secondary-dark); }
-        .btn-blue { background: var(--primary); color: white; }
-        .btn-blue:hover { background: var(--primary-dark); }
-
-        /* --- Seção de Funcionalidades (Grade 2x2) --- */
-        .features {
-            background-color: var(--bg-light);
-            padding: 80px 0;
-            border-radius: 40px;
-            margin-bottom: 60px;
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s ease forwards;
         }
-
-        .features-header {
-            text-align: center;
-            margin-bottom: 50px;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-
-        .features-header h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 15px; }
-        .features-header p { color: var(--text-muted); font-size: 1.1rem; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 30px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            text-align: center;
-            border: 2px solid transparent;
-            transition: border-color 0.3s;
-        }
-        
-        .card:hover { border-color: var(--primary); }
-        .card-icon { font-size: 2.5rem; margin-bottom: 15px; }
-        .card h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--text-main); }
-        .card p { color: var(--text-muted); font-size: 0.95rem; }
-
-        /* --- Seção de Download --- */
-        .download { text-align: center; padding: 60px 0; }
-        .download h2 { font-size: 2rem; margin-bottom: 30px; }
-        .btn-group { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;}
-        .download small { color: var(--text-muted); }
-
-        /* --- Rodapé --- */
-        footer {
-            text-align: center;
-            padding: 30px 0;
-            border-top: 1px solid #e2e8f0;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        /* Responsividade para Celulares */
-        @media (max-width: 768px) {
-            .hero { flex-direction: column; text-align: center; padding: 40px 0; }
-            .grid { grid-template-columns: 1fr; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+        .delay-400 { animation-delay: 0.4s; }
+        .screenshot-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
     </style>
 </head>
-<body>
-
-    <header>
-        <div class="container">
-            <nav>
-                <div class="logo-container">
-                    <img src="logo.png" alt="Ícone do Projeto" class="logo-icon">
-                    <div class="logo-text">Gerador de Campanhas Escolares</div>
+<body class="font-sans bg-gray-50 text-gray-800 antialiased">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md shadow-sm z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <img src="imgs/logo.png" alt="Logo" class="h-10 w-10">
+                    <span class="font-bold text-xl text-gray-900">Gerador de Campanhas</span>
                 </div>
-                <div class="badge">Tauri v2</div>
-            </nav>
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#sobre" class="text-gray-600 hover:text-primary-600 font-medium transition-colors">Sobre</a>
+                    <a href="#recursos" class="text-gray-600 hover:text-primary-600 font-medium transition-colors">Recursos</a>
+                    <a href="#download" class="text-gray-600 hover:text-primary-600 font-medium transition-colors">Download</a>
+                </div>
+                <a href="#download" class="hidden sm:inline-flex btn-primary text-white px-5 py-2.5 rounded-lg font-semibold text-sm">
+                    Baixar Agora
+                </a>
+            </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="container">
-        <section class="hero">
-            <div class="hero-text">
-                <h1>A voz dos alunos começa aqui</h1>
-                <p>O Gerador de Campanhas Escolares é a ferramenta leve e segura que ajuda estudantes a transformarem ideias em ações de cidadania.</p>
-                <a href="#download" class="btn btn-orange">Quero usar na minha escola</a>
-            </div>
-            
-            <div class="hero-app">
-                <img src="tela-principal.png" alt="Tela Principal do Aplicativo" class="app-screenshot">
-            </div>
-        </section>
-
-        <section class="features">
-            <div class="features-header">
-                <h2>Por que um Gerador de Campanhas?</h2>
-                <p>Diferente de simples editores, este projeto foi desenhado para o contexto das <strong>Eleições Escolares</strong>. Ele permite que alunos organizem suas ideias e propostas sem as distrações de ferramentas profissionais.</p>
-            </div>
-
-            <div class="grid">
-                <div class="card">
-                    <div class="card-icon">🧒</div>
-                    <h3>Foco no Aluno</h3>
-                    <p>Interface adaptada para reduzir a carga cognitiva, ideal para os anos iniciais do Ensino Fundamental.</p>
+    <!-- Hero Section -->
+    <section class="gradient-hero min-h-screen flex items-center pt-16 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-accent-500 rounded-full blur-3xl"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-6 fade-in">
+                        <svg class="w-5 h-5 text-accent-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                        </svg>
+                        <span class="text-white/90 text-sm font-medium">Aplicativo Desktop</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6 fade-in delay-100">
+                        A voz dos alunos começa aqui
+                    </h1>
+                    <p class="text-xl text-blue-100 mb-8 max-w-xl mx-auto lg:mx-0 fade-in delay-200">
+                        O Gerador de Campanhas Escolares é a ferramenta leve e segura que ajuda estudantes a transformarem ideias em ações de cidadania.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start fade-in delay-300">
+                        <a href="#download" class="btn-primary text-white px-8 py-4 rounded-xl font-bold text-lg inline-flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Quero usar na minha escola
+                        </a>
+                        <a href="#recursos" class="btn-secondary bg-white/10 text-white px-8 py-4 rounded-xl font-semibold text-lg inline-flex items-center justify-center gap-2 backdrop-blur-sm">
+                            Conhecer Recursos
+                        </a>
+                    </div>
                 </div>
-                <div class="card">
-                    <div class="card-icon">🔒</div>
-                    <h3>Privacidade Total</h3>
-                    <p>Como é um aplicativo desktop, nenhuma foto ou dado do aluno sobe para a nuvem. Tudo fica no computador da escola.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">⚡</div>
-                    <h3>Leve e Rápido</h3>
-                    <p>Ocupa pouquíssimo espaço e roda perfeitamente em computadores com hardware modesto encontrados em laboratórios.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">⚖️</div>
-                    <h3>Código Aberto</h3>
-                    <p>Software Livre (GPLv3) e sem mensalidades. Criado por quem conhece bem o ambiente escolar.</p>
+                <div class="relative fade-in delay-400">
+                    <div class="absolute -inset-4 bg-gradient-to-r from-accent-500 to-primary-500 rounded-2xl blur-xl opacity-30"></div>
+                    <img src="imgs/tela-principal.png" alt="Interface do Gerador de Campanhas" class="relative rounded-2xl screenshot-shadow floating w-full max-w-lg mx-auto">
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section id="download" class="download">
-            <h2>Pronto para usar na sua escola?</h2>
-            <div class="btn-group">
-                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn btn-blue">Baixar Windows (.msi)</a>
-                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="btn btn-blue">Baixar Linux (.deb)</a>
+    <!-- About Section -->
+    <section id="sobre" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="inline-block text-primary-600 font-semibold text-sm uppercase tracking-wider mb-4">Por que escolher</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Por que um Gerador de Campanhas?</h2>
+                <p class="text-xl text-gray-600">
+                    Diferente de simples editores, este projeto foi desenhado para o contexto das <strong>Eleições Escolares</strong>. Ele permite que alunos organizem suas ideias e propostas sem as distrações de ferramentas profissionais.
+                </p>
             </div>
-            <small>Código-fonte disponível sob licença GPLv3.</small>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <footer>
-        <div class="container">
-            <p>Desenvolvido com ❤️ pelo Prof. Sérgio Vitor</p>
+    <!-- Features Section -->
+    <section id="recursos" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="inline-block text-primary-600 font-semibold text-sm uppercase tracking-wider mb-4">Funcionalidades</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Feito para o ambiente escolar</h2>
+                <p class="text-xl text-gray-600">
+                    Uma solução completa desenvolvida pensando nas necessidades reais dos estudantes.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                    <div class="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Foco no Aluno</h3>
+                    <p class="text-gray-600">Interface adaptada para reduzir a carga cognitiva, ideal para os anos iniciais do Ensino Fundamental.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="feature-card bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                    <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Privacidade Total</h3>
+                    <p class="text-gray-600">Como é um aplicativo desktop, nenhuma foto ou dado do aluno sobe para a nuvem. Tudo fica no computador da escola.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="feature-card bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                    <div class="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Leve e Rápido</h3>
+                    <p class="text-gray-600">Ocupa pouquíssimo espaço e roda perfeitamente em computadores com hardware modesto encontrados em laboratórios.</p>
+                </div>
+                <!-- Feature 4 -->
+                <div class="feature-card bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                    <div class="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Código Aberto</h3>
+                    <p class="text-gray-600">Software Livre (GPLv3) e sem mensalidades. Criado por quem conhece bem o ambiente escolar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="inline-block text-primary-600 font-semibold text-sm uppercase tracking-wider mb-4">Download</span>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">Pronto para usar na sua escola?</h2>
+                <p class="text-xl text-gray-600">
+                    Escolha a versão compatível com o sistema operacional da sua escola e comece a criar campanhas incríveis.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Windows Download -->
+                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="feature-card group bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 border-2 border-gray-200 hover:border-primary-500">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Windows</h3>
+                            <p class="text-gray-500">Arquivo .msi</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-primary-600 font-semibold group-hover:text-primary-700">Baixar para Windows</span>
+                        <svg class="w-6 h-6 text-primary-600 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </div>
+                </a>
+                <!-- Linux Download -->
+                <a href="https://github.com/sergiovitor/gerador-campanha/releases" class="feature-card group bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 border-2 border-gray-200 hover:border-primary-500">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-gray-900">Linux</h3>
+                            <p class="text-gray-500">Arquivo .deb</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-primary-600 font-semibold group-hover:text-primary-700">Baixar para Linux</span>
+                        <svg class="w-6 h-6 text-primary-600 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+            <div class="text-center mt-12">
+                <p class="text-gray-500 mb-4">Código-fonte disponível sob licença GPLv3.</p>
+                <a href="https://github.com/sergiovitor/gerador-campanha" target="_blank" class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    Ver no GitHub
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="flex items-center gap-3">
+                    <img src="imgs/logo.png" alt="Logo" class="h-10 w-10">
+                    <span class="font-bold text-xl">Gerador de Campanhas Escolares</span>
+                </div>
+                <div class="flex items-center gap-2 text-gray-400">
+                    <span>Desenvolvido com</span>
+                    <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>pelo Prof. Sérgio Vitor</span>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+                <p>&copy; 2024 Gerador de Campanhas Escolares. Software Livre sob licença GPLv3.</p>
+            </div>
         </div>
     </footer>
 
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', function() {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-md');
+            } else {
+                nav.classList.remove('shadow-md');
+            }
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animationPlayState = 'running';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.animationPlayState = 'paused';
+            observer.observe(el);
+        });
+    </script>
+
+
+<script>
+/**
+ * Iframe 元素高亮注入脚本
+ * 需要在目标网站中引入此脚本来支持跨域 iframe 高亮功能
+ *
+ * 使用方法：
+ * 1. 将此脚本添加到目标网站的 HTML 中
+ * 2. 或通过浏览器扩展、用户脚本等方式注入
+ */
+
+(function () {
+  "use strict";
+
+  // 检查是否在 iframe 中
+  if (window.self === window.top) {
+    return; // 不在 iframe 中，不执行
+  }
+
+  // 检查是否已经初始化过
+  if (window.__iframeHighlightInitialized) {
+    return;
+  }
+  window.__iframeHighlightInitialized = true;
+  console.log("Iframe 高亮脚本已加载");
+
+  // 创建高亮覆盖层
+  var overlay = document.createElement("div");
+  overlay.id = "iframe-highlight-overlay";
+  overlay.style.cssText = "\n    position: fixed;\n    top: 0;\n    left: 0;\n    width: 100vw;\n    height: 100vh;\n    pointer-events: none;\n    z-index: 999999;\n    overflow: hidden;\n  ";
+
+  // 创建悬停高亮框（虚线边框）
+  var highlightBox = document.createElement("div");
+  highlightBox.id = "iframe-highlight-box";
+  highlightBox.style.cssText = "\n    position: absolute;\n    border: 2px dashed #007AFF;\n    background: rgba(0, 122, 255, 0.08);\n    pointer-events: none;\n    display: none;\n    transition: all 0.1s ease;\n    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);\n    border-radius: 2px;\n  ";
+
+  // 创建选中节点的常驻高亮框（实线边框）
+  var selectedBox = document.createElement("div");
+  selectedBox.id = "iframe-selected-box";
+  selectedBox.style.cssText = "\n    position: absolute;\n    border: 2px solid #007AFF;\n    pointer-events: none;\n    display: none;\n    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.9), 0 0 8px rgba(255, 107, 53, 0.4);\n    border-radius: 2px;\n    z-index: 1000000;\n  ";
+
+  // 创建悬停标签显示
+  var tagLabel = document.createElement("div");
+  tagLabel.id = "iframe-tag-label";
+  tagLabel.style.cssText = "\n    position: absolute;\n    background: #007AFF;\n    color: white;\n    padding: 2px 6px;\n    font-size: 11px;\n    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n    border-radius: 2px;\n    pointer-events: none;\n    display: none;\n    white-space: nowrap;\n    z-index: 1000001;\n    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);\n    font-weight: 500;\n  ";
+
+  // 创建选中节点标签
+  var selectedLabel = document.createElement("div");
+  selectedLabel.id = "iframe-selected-label";
+  selectedLabel.style.cssText = "\n    position: absolute;\n    background: #007AFF;\n    color: white;\n    padding: 3px 8px;\n    font-size: 11px;\n    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;\n    border-radius: 3px;\n    pointer-events: none;\n    display: none;\n    white-space: nowrap;\n    z-index: 1000002;\n    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);\n    font-weight: 600;\n  ";
+  overlay.appendChild(highlightBox);
+  overlay.appendChild(selectedBox);
+  overlay.appendChild(tagLabel);
+  overlay.appendChild(selectedLabel);
+  document.body.appendChild(overlay);
+
+  // 存储当前选中的元素
+  var selectedElement = null;
+  var highlightEnabled = false;
+
+  // 更新选中元素的高亮显示
+  function updateSelectedHighlight(element) {
+    console.log("updateSelectedHighlight called with:", element);
+    if (!element) {
+      selectedBox.style.display = "none";
+      selectedLabel.style.display = "none";
+      selectedElement = null;
+      console.log("Cleared selected highlight");
+      return;
+    }
+    selectedElement = element;
+    var rect = element.getBoundingClientRect();
+    console.log("Selected element rect:", rect);
+
+    // 更新选中高亮框位置
+    selectedBox.style.display = "block";
+    selectedBox.style.left = "".concat(rect.left - 2, "px");
+    selectedBox.style.top = "".concat(rect.top - 2, "px");
+    selectedBox.style.width = "".concat(rect.width + 4, "px");
+    selectedBox.style.height = "".concat(rect.height + 4, "px");
+
+    // 更新选中标签位置和内容
+    selectedLabel.style.display = "block";
+    selectedLabel.textContent = "\u2713 <".concat(element.tagName.toLowerCase(), ">");
+
+    // 计算标签位置，确保不超出视窗
+    var labelTop = rect.top - 28;
+    var labelLeft = rect.left;
+
+    // 如果标签会超出顶部，显示在元素下方
+    if (labelTop < 5) {
+      labelTop = rect.bottom + 5;
+    }
+
+    // 如果标签会超出右侧，向左调整
+    var labelWidth = selectedLabel.offsetWidth || 100; // 预估宽度
+    if (labelLeft + labelWidth > window.innerWidth - 10) {
+      labelLeft = window.innerWidth - labelWidth - 10;
+    }
+    selectedLabel.style.left = "".concat(Math.max(5, labelLeft), "px");
+    selectedLabel.style.top = "".concat(labelTop, "px");
+    console.log("Selected highlight positioned at:", {
+      left: selectedBox.style.left,
+      top: selectedBox.style.top,
+      width: selectedBox.style.width,
+      height: selectedBox.style.height
+    });
+  }
+  function getElementSelector(element) {
+    if (!(element instanceof Element)) throw new Error('Argument must be a DOM element');
+    var segments = [];
+    var current = element;
+    while (current !== document.documentElement) {
+      var selector = '';
+      // 优先检查唯一ID
+      if (current.id && document.querySelectorAll("#".concat(current.id)).length === 1) {
+        segments.unshift("#".concat(current.id));
+        break; // ID唯一，无需继续向上
+      }
+
+      // 生成类名选择器（取第一个有效类名）
+      var classes = Array.from(current.classList).filter(function (c) {
+        return !c.startsWith('js-');
+      });
+      var className = classes.length > 0 ? ".".concat(classes[0]) : '';
+
+      // 生成位置索引（nth-child）
+      var tag = current.tagName.toLowerCase();
+      if (!className) {
+        var siblings = Array.from(current.parentNode.children);
+        var index = siblings.findIndex(function (el) {
+          return el === current;
+        }) + 1;
+        selector = "".concat(tag, ":nth-child(").concat(index, ")");
+      } else {
+        selector = className;
+      }
+      segments.unshift(selector);
+      current = current.parentElement;
+    }
+
+    // 处理根元素
+    if (current === document.documentElement) {
+      segments.unshift('html');
+    }
+    return segments.join(' > ');
+  }
+
+  // 获取元素文本内容
+  function getElementText(element) {
+    var _element$textContent;
+    if (element.tagName === "INPUT") {
+      return element.value || element.placeholder || "";
+    }
+    if (element.tagName === "TEXTAREA") {
+      return element.value || element.placeholder || "";
+    }
+    var text = ((_element$textContent = element.textContent) === null || _element$textContent === void 0 ? void 0 : _element$textContent.trim()) || "";
+    return text.length > 50 ? text.substring(0, 50) + "..." : text;
+  }
+
+  // 获取元素属性信息
+  function getElementAttributes(element) {
+    var attrs = {};
+    for (var i = 0; i < element.attributes.length; i++) {
+      var attr = element.attributes[i];
+      attrs[attr.name] = attr.value;
+    }
+    return attrs;
+  }
+
+  // 鼠标悬停事件处理
+  function handleMouseOver(e) {
+    if (!highlightEnabled) return;
+    var target = e.target;
+    if (!target || target === overlay || target === highlightBox || target === tagLabel || target === selectedBox || target === selectedLabel) {
+      return;
+    }
+
+    // 避免高亮 html 和 body 元素
+    if (target === document.documentElement || target === document.body) {
+      return;
+    }
+
+    // 如果是已选中的元素，不显示悬停高亮
+    if (target === selectedElement) {
+      highlightBox.style.display = "none";
+      tagLabel.style.display = "none";
+      return;
+    }
+    var rect = target.getBoundingClientRect();
+    var selector = getElementSelector(target);
+    var text = getElementText(target);
+    var attributes = getElementAttributes(target);
+
+    // 更新悬停高亮框位置
+    highlightBox.style.display = "block";
+    highlightBox.style.left = "".concat(rect.left - 2, "px");
+    highlightBox.style.top = "".concat(rect.top - 2, "px");
+    highlightBox.style.width = "".concat(rect.width + 4, "px");
+    highlightBox.style.height = "".concat(rect.height + 4, "px");
+
+    // 更新标签位置和内容
+    tagLabel.style.display = "block";
+    tagLabel.textContent = "<".concat(target.tagName.toLowerCase(), ">");
+
+    // 计算标签位置，确保不超出视窗
+    var labelTop = rect.top - 22;
+    var labelLeft = rect.left;
+
+    // 如果标签会超出顶部，显示在元素下方
+    if (labelTop < 0) {
+      labelTop = rect.bottom + 5;
+    }
+
+    // 如果标签会超出右侧，向左调整
+    if (labelLeft + tagLabel.offsetWidth > window.innerWidth) {
+      labelLeft = window.innerWidth - tagLabel.offsetWidth - 5;
+    }
+    tagLabel.style.left = "".concat(Math.max(0, labelLeft), "px");
+    tagLabel.style.top = "".concat(labelTop, "px");
+
+    // 发送消息到父窗口
+    var elementInfo = {
+      tagName: target.tagName.toLowerCase(),
+      rect: {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+        x: rect.x,
+        y: rect.y
+      },
+      selector: selector,
+      text: text,
+      attributes: attributes,
+      url: window.location.href,
+      path: window.location.pathname,
+      timestamp: Date.now()
+    };
+    try {
+      window.parent.postMessage({
+        type: "iframe-element-hover",
+        data: elementInfo,
+        source: "iframe-highlight-injector"
+      }, "*");
+    } catch (error) {
+      console.warn("无法发送消息到父窗口:", error);
+    }
+  }
+
+  // 鼠标离开事件处理
+  function handleMouseOut(e) {
+    if (!highlightEnabled) return;
+    var relatedTarget = e.relatedTarget;
+
+    // 如果鼠标移动到高亮相关元素上，不隐藏高亮
+    if (relatedTarget && (relatedTarget === highlightBox || relatedTarget === tagLabel || relatedTarget === overlay || relatedTarget === selectedBox || relatedTarget === selectedLabel)) {
+      return;
+    }
+    highlightBox.style.display = "none";
+    tagLabel.style.display = "none";
+    try {
+      window.parent.postMessage({
+        type: "iframe-element-hover",
+        data: null,
+        source: "iframe-highlight-injector"
+      }, "*");
+    } catch (error) {
+      console.warn("无法发送消息到父窗口:", error);
+    }
+  }
+
+  // 点击事件处理
+  function handleClick(e) {
+    var target = e.target;
+    if (!target || target === overlay || target === highlightBox || target === tagLabel || target === selectedBox || target === selectedLabel) {
+      return;
+    }
+
+    // 避免处理 html 和 body 元素
+    if (target === document.documentElement || target === document.body) {
+      return;
+    }
+
+    // 检查是否是交互元素，这些元素需要保留默认行为
+    var isInteractiveElement = ['input', 'textarea', 'select', 'button', 'a'].includes(target.tagName.toLowerCase());
+
+    // 如果高亮功能启用，对于非交互元素阻止默认行为和事件传播
+    if (highlightEnabled) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    var rect = target.getBoundingClientRect();
+    var selector = getElementSelector(target);
+    var text = getElementText(target);
+    var attributes = getElementAttributes(target);
+    console.log("Element clicked:", {
+      tagName: target.tagName,
+      selector: selector,
+      rect: rect
+    });
+
+    // 立即更新选中高亮
+    updateSelectedHighlight(target);
+
+    // 隐藏悬停高亮，因为现在是选中状态
+    highlightBox.style.display = "none";
+    tagLabel.style.display = "none";
+    var elementInfo = {
+      tagName: target.tagName.toLowerCase(),
+      rect: {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+        x: rect.x,
+        y: rect.y
+      },
+      selector: selector,
+      text: text,
+      attributes: attributes,
+      url: window.location.href,
+      path: window.location.pathname,
+      timestamp: Date.now()
+    };
+    try {
+      window.parent.postMessage({
+        type: "iframe-element-click",
+        data: elementInfo,
+        source: "iframe-highlight-injector"
+      }, "*");
+    } catch (error) {
+      console.warn("无法发送消息到父窗口:", error);
+    }
+  }
+
+  // 监听来自父窗口的消息
+  function handleParentMessage(event) {
+    console.log("Received message from parent:", event.data);
+    if (event.data.type === "iframe-highlight-toggle") {
+      var enabled = event.data.enabled;
+      console.log("Highlight toggle:", enabled);
+      if (enabled) {
+        enableHighlight();
+      } else {
+        disableHighlight();
+      }
+    } else if (event.data.type === "enable-iframe-highlight") {
+      console.log("Enable iframe highlight");
+      enableHighlight();
+    } else if (event.data.type === "disable-iframe-highlight") {
+      console.log("Disable iframe highlight");
+      disableHighlight();
+    } else if (event.data.type === "toggle-iframe-highlight") {
+      var _enabled = event.data.enabled !== undefined ? event.data.enabled : !highlightEnabled;
+      console.log("Toggle iframe highlight to:", _enabled);
+      if (_enabled) {
+        enableHighlight();
+      } else {
+        disableHighlight();
+      }
+    } else if (event.data.type === "update-selected-element") {
+      var selector = event.data.selector;
+      console.log("Update selected element with selector:", selector);
+      if (selector) {
+        try {
+          var element = document.querySelector(selector);
+          console.log("Found element by selector:", element);
+          updateSelectedHighlight(element);
+        } catch (error) {
+          console.warn("Failed to select element:", error);
+          updateSelectedHighlight(null);
+        }
+      } else {
+        updateSelectedHighlight(null);
+      }
+    } else if (event.data.type === "clear-selected-element") {
+      console.log("Clear selected element");
+      updateSelectedHighlight(null);
+    }
+  }
+
+  // 启用高亮功能
+  function enableHighlight() {
+    console.log("Enabling highlight");
+    document.addEventListener("mouseover", handleMouseOver, true);
+    document.addEventListener("mouseout", handleMouseOut, true);
+    document.addEventListener("click", handleClick, true);
+    highlightEnabled = true;
+    overlay.style.display = "block";
+  }
+
+  // 禁用高亮功能
+  function disableHighlight() {
+    console.log("Disabling highlight");
+    highlightEnabled = false;
+    // 保持事件监听器，但通过 highlightEnabled 变量控制行为
+    // 这样可以保留选中状态的显示
+    highlightBox.style.display = "none";
+    tagLabel.style.display = "none";
+    // 不隐藏 selectedBox 和 selectedLabel，保留选中状态
+  }
+
+  // 完全禁用高亮功能（移除所有监听器）
+  function fullyDisableHighlight() {
+    console.log("Fully disabling highlight");
+    highlightEnabled = false;
+    document.removeEventListener("mouseover", handleMouseOver, true);
+    document.removeEventListener("mouseout", handleMouseOut, true);
+    document.removeEventListener("click", handleClick, true);
+    overlay.style.display = "none";
+    highlightBox.style.display = "none";
+    tagLabel.style.display = "none";
+    selectedBox.style.display = "none";
+    selectedLabel.style.display = "none";
+  }
+
+  // 添加事件监听
+  enableHighlight();
+  window.addEventListener("message", handleParentMessage);
+
+  // 暴露全局函数供外部调用
+  window.__iframeHighlightControl = {
+    enable: enableHighlight,
+    disable: disableHighlight,
+    fullyDisable: fullyDisableHighlight,
+    isEnabled: function isEnabled() {
+      return highlightEnabled;
+    },
+    getSelectedElement: function getSelectedElement() {
+      return selectedElement;
+    },
+    updateSelected: updateSelectedHighlight,
+    // 通过消息发送开关控制
+    sendToggleMessage: function sendToggleMessage(enabled) {
+      window.parent.postMessage({
+        type: 'iframe-highlight-status',
+        enabled: enabled || highlightEnabled,
+        source: 'iframe-highlight-injector'
+      }, '*');
+    }
+  };
+
+  // 通知父窗口脚本已加载
+  try {
+    window.parent.postMessage({
+      type: "iframe-highlight-ready",
+      data: {
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        timestamp: Date.now()
+      },
+      source: "iframe-highlight-injector"
+    }, "*");
+  } catch (error) {
+    console.warn("无法发送就绪消息到父窗口:", error);
+  }
+
+  // 清理函数
+  window.__iframeHighlightCleanup = function () {
+    fullyDisableHighlight();
+    window.removeEventListener("message", handleParentMessage);
+    if (overlay.parentElement) {
+      overlay.parentElement.removeChild(overlay);
+    }
+    delete window.__iframeHighlightInitialized;
+    delete window.__iframeHighlightCleanup;
+  };
+})();
+
+</script>
 </body>
 </html>
